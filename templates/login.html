@@ -35,6 +35,21 @@
         </form>
     </div>
 
+    <div class="info-panel">
+        <details class="hint-box">
+            <summary>Hint: What's the vulnerability?</summary>
+            <p>This page is vulnerable to <strong>SQL Injection (Authentication Bypass)</strong>. The backend constructs the database query by directly concatenating your input. How could you manipulate the query to always evaluate to true?</p>
+        </details>
+
+        <details class="solution-box">
+            <summary>Solution: How to exploit it</summary>
+            <p>The backend executes: <code>SELECT * FROM users WHERE username='{username}' AND password='{password}'</code>.</p>
+            <p><strong>Payload (Username):</strong> <code>' OR '1'='1' -- </code></p>
+            <p><strong>Password:</strong> (leave blank or type anything)</p>
+            <p>This payload alters the SQL logic and uses the <code>-- </code> sequence to comment out the password check, logging you in as the first user.</p>
+        </details>
+    </div>
+
     <footer>
         <p>VulnLab — Educational Security Sandbox.</p>
         <p>Mode: <strong>{% if vuln_mode %}VULNERABLE{% else %}PATCHED{% endif %}</strong></p>

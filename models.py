@@ -13,6 +13,13 @@ class User(db.Model):
     password = db.Column(db.String(50), nullable=False) 
     password_hash = db.Column(db.String(256), nullable=False)
 
+class Product(db.Model):
+    __tablename__ = 'products'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
 def seed_db():
     # Seed with dummy users if the table is empty
     if User.query.first() is None:
@@ -27,4 +34,15 @@ def seed_db():
             password_hash=generate_password_hash('password123')
         )
         db.session.add_all([user1, user2])
+        db.session.commit()
+
+    # Seed products if empty
+    if Product.query.first() is None:
+        p1 = Product(name='Secure Router', price=199.99, description='A very secure home router with default passwords changed.')
+        p2 = Product(name='Hacker Keyboard', price=75.50, description='Mechanical keyboard for typing payloads fast.')
+        p3 = Product(name='Privacy Screen', price=25.00, description='Keep prying eyes away from your terminal.')
+        p4 = Product(name='VPN Subscription (1 Yr)', price=49.99, description='Anonymous browsing for your whole family.')
+        p5 = Product(name='Webcam Cover', price=5.99, description='Stop hackers from watching you.')
+        p6 = Product(name='Faraday Bag', price=30.00, description='Block all wireless signals from your devices.')
+        db.session.add_all([p1, p2, p3, p4, p5, p6])
         db.session.commit()

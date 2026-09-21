@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VulnLab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="card">
+        <h2>VulnLab Login</h2>
+        
+        <!-- Flash messages for login errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="POST">
+            <!-- No client-side validation (e.g. no 'required', no patterns) to allow raw inputs for SQLi/XSS -->
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>VulnLab — Educational Security Sandbox.</p>
+        <p>Mode: <strong>{% if vuln_mode %}VULNERABLE{% else %}PATCHED{% endif %}</strong></p>
+    </footer>
+</body>
+</html>

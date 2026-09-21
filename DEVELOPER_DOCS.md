@@ -52,3 +52,62 @@ By using `filter_by(username=username)`, the underlying database driver treats t
 - **Config Flag:** `config.VULN_MODE["sqli"]`
 - Set to `True` to enable the vulnerable string-concatenation query.
 - Set to `False` to enable the patched SQLAlchemy ORM parameterized query.
+
+---
+
+## Page 2: Product Search — SQL Injection (UNION-based Data Extraction)
+
+### Page Structure
+- **Route Path:** `/search`
+- **Template File:** `templates/search.html`
+- **Form Fields:** `query` (text search input)
+- **Backend File/Function Involved:** `modules/search.py` -> `search()` route function
+
+### Vulnerability Type & OWASP Category
+SQL Injection (UNION-based) — **A03:2021-Injection**
+
+### Root Cause
+The vulnerability stems from the use of unsafe string concatenation to build the SQL query. The `LIKE` operator takes raw user input dynamically instead of using a parameterized query, allowing an attacker to break out of the intended query structure.
+
+Vulnerable line of code (`modules/search.py`):
+```python
+sql = f"SELECT name, price, description FROM products WHERE name LIKE '%{query}%'"
+```
+
+### Exploitation Steps
+1. Navigate to the product search page at `/search`.
+2. Ensure the vulnerability mode is active (Footer should read "Mode: VULNERABLE").
+3. In the search input field, enter the following payload: 
+   `' UNION SELECT username, password_hash, 'x' FROM users -- `
+4. Click **Search**.
+
+**Why this payload works:**
+In a UNION-based SQL Injection, the injected `UNION SELECT` statement must return the exact same number of columns as the original `SELECT` statement. The original query selects 3 columns (`name`, `price`, `description`). 
+Our payload provides exactly 3 columns:
+1. `username` (from users table)
+2. `password_hash` (from users table)
+3. `'x'` (a dummy string literal to satisfy the 3-column requirement)
+
+When injected into the string concatenation, the resulting SQL query becomes:
+```sql
+SELECT name, price, description FROM products WHERE name LIKE '%' UNION SELECT username, password_hash, 'x' FROM users -- %'
+```
+The `-- ` comment sequence neutralizes the trailing `%'` left over from the code. The database executes both the product search and our injected query, combining the results. Because the frontend blindly renders the returned columns in a table, the usernames and password hashes are displayed directly on the webpage.
+
+### Impact
+- **Severity:** High
+- **Gain:** Data exfiltration. An attacker can systematically dump sensitive data (like password hashes, PII, or API keys) from entirely unrelated tables, bypassing application logic.
+
+### Fix Applied
+The patched version utilizes SQLAlchemy's Object-Relational Mapper (ORM), which automatically creates parameterized queries under the hood.
+
+Patched code (`modules/search.py`):
+```python
+products = Product.query.filter(Product.name.contains(query)).all()
+```
+When using `.contains()`, the search string is bound as a parameter instead of being interpolated into the raw SQL string. The database driver treats the injected payload strictly as literal search text, making it impossible to break out of the string boundary or execute secondary SQL commands.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["sqli"]` (Shares the general SQLi toggle)
+- Set to `True` to enable the vulnerable string-concatenation search query.
+- Set to `False` to enable the patched SQLAlchemy ORM parameterized query.

@@ -30,3 +30,14 @@ def comments():
     return render_template('comments.html', 
                            comments=all_comments, 
                            vuln_mode=vuln_mode)
+
+@xss_bp.route('/search_reflected', methods=['GET'])
+def search_reflected():
+    # The vulnerability depends purely on the frontend template logic (using | safe).
+    # The backend simply reflects the input back to the template.
+    query = request.args.get('query', '')
+    vuln_mode = VULN_MODE.get("xss", True)
+    
+    return render_template('search_reflected.html',
+                           search_query=query,
+                           vuln_mode=vuln_mode)

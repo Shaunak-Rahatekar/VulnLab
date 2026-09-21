@@ -132,3 +132,29 @@ details code {
     font-family: monospace;
     color: #d9534f;
 }
+
+/* Search Results Table Styles */
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.results-table th, .results-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.results-table th {
+    background-color: #0056b3;
+    color: white;
+}
+
+.results-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.results-table tr:hover {
+    background-color: #f1f1f1;
+}

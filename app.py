@@ -4,6 +4,7 @@ from config import VULN_MODE
 from models import db, seed_db
 from modules.sqli import sqli_bp
 from modules.search import search_bp
+from modules.xss import xss_bp
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_key_for_vulnlab_sandbox'
@@ -16,6 +17,7 @@ db.init_app(app)
 # Register module blueprints
 app.register_blueprint(sqli_bp)
 app.register_blueprint(search_bp)
+app.register_blueprint(xss_bp)
 
 # Create tables and seed data upon startup
 with app.app_context():

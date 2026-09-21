@@ -5,4 +5,5 @@
 # False = Patched (secure mode)
 VULN_MODE = {
     "sqli": True,
+    "xss": True,
 }

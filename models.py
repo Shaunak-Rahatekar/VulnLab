@@ -1,6 +1,7 @@
 # models.py
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -19,6 +20,13 @@ class Product(db.Model):
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=False)
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 def seed_db():
     # Seed with dummy users if the table is empty

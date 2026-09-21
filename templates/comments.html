@@ -56,9 +56,9 @@
                         </h4>
                         <p>
                             {% if vuln_mode %}
-                                {{ c.comment | safe }}
+                                {{ c.text | safe }}
                             {% else %}
-                                {{ c.comment }}
+                                {{ c.text }}
                             {% endif %}
                         </p>
                     </div>

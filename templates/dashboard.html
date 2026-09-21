@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - VulnLab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .dashboard-box {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .balance {
+            font-size: 2.5rem;
+            color: #28a745;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .activity-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .activity-list li:last-child {
+            border-bottom: none;
+        }
+        .date {
+            color: #888;
+            font-size: 0.85rem;
+            margin-right: 1rem;
+            display: inline-block;
+            width: 70px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" style="max-width: 800px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 1rem;">
+            <h2 style="margin: 0;">Welcome, {{ session.get('username') }}!</h2>
+            <a href="/logout" style="background-color: #d9534f; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-weight: bold;">Logout</a>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-box">
+                <h3 style="margin-top: 0; color: #333;">Account Balance</h3>
+                <div class="balance">$1,337.00</div>
+                <p style="color: #666; margin: 0;">Available Funds</p>
+                <button style="margin-top: 1.5rem; background-color: #28a745; width: 100%; border-radius: 4px; padding: 0.75rem; color: white; border: none; font-size: 1rem; cursor: pointer;">Transfer Funds</button>
+            </div>
+            
+            <div class="dashboard-box">
+                <h3 style="margin-top: 0; color: #333;">Recent Activity</h3>
+                <ul class="activity-list">
+                    <li><span class="date">Today</span> Login successful from 127.0.0.1</li>
+                    <li><span class="date">Yesterday</span> Password changed successfully</li>
+                    <li><span class="date">Oct 12</span> Funds deposited (+$500.00)</li>
+                    <li><span class="date">Oct 05</span> Account created</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hint and Solution Toggles -->
+    <div class="info-panel" style="max-width: 800px;">
+        <details class="hint-box">
+            <summary>Hint: What's the vulnerability?</summary>
+            <p>How does the server know you are logged in right now? Check your browser's developer tools (Application > Cookies). If an attacker steals that exact cookie value using the Stored XSS payload from Page 3, what happens if they inject it into their own browser?</p>
+        </details>
+
+        <details class="solution-box">
+            <summary>Solution: How to exploit it</summary>
+            <p><strong>Vulnerability:</strong> Session Hijacking (via XSS) and Session Fixation</p>
+            <p><strong>Exploitation:</strong></p>
+            <ol>
+                <li>Drop the payload <code>&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code> in the Guestbook (Page 3).</li>
+                <li>Copy the session cookie value that pops up.</li>
+                <li>Open a new browser (like Incognito mode) where you are NOT logged in.</li>
+                <li>Open DevTools, manually set the <code>session</code> cookie to the stolen value.</li>
+                <li>Navigate to <code>/dashboard</code>. You are now logged in as the victim without knowing their password!</li>
+            </ol>
+            <p>In <strong>Vulnerable</strong> mode, the session cookie lacks the <code>HttpOnly</code> flag (allowing JS to read it). In <strong>Patched</strong> mode, the <code>HttpOnly</code> flag is set to true, making <code>document.cookie</code> return nothing for that cookie, thereby blocking XSS-based hijacking entirely.</p>
+        </details>
+    </div>
+
+    <footer>
+        <p>VulnLab — Educational Security Sandbox.</p>
+        <p>Mode: <strong>{% if vuln_mode %}VULNERABLE{% else %}PATCHED{% endif %}</strong></p>
+        <p><a href="/search">Go to Product Search</a> | <a href="/comments">Go to Guestbook</a></p>
+    </footer>
+</body>
+</html>

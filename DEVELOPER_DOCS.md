@@ -161,3 +161,51 @@ When auto-escaping is active, Jinja2 translates dangerous characters into their 
 - **Config Flag:** `config.VULN_MODE["xss"]`
 - Set to `True` to use the `| safe` filter (disabling auto-escaping).
 - Set to `False` to rely on Jinja2's default auto-escaping (safely rendering HTML).
+
+---
+
+## Page 4: Reflected Search — Reflected XSS
+
+### Page Structure
+- **Route Path:** `/search_reflected`
+- **Template File:** `templates/search_reflected.html`
+- **Form Fields:** `query` (text search input, passed as a GET parameter)
+- **Backend File/Function Involved:** `modules/xss.py` -> `search_reflected()` route function
+
+### Vulnerability Type & OWASP Category
+Reflected Cross-Site Scripting (XSS) — **A03:2021-Injection**
+
+### Root Cause
+Similar to the Stored XSS module, the root cause is a failure to properly encode user output before rendering it into the DOM. In this specific scenario, the application takes a URL query parameter (`query=...`) and immediately echoes it back onto the webpage ("Showing results for: ..."). In vulnerable mode, the Jinja2 template applies the `| safe` filter to the input, bypassing the built-in HTML entity encoder and allowing raw markup to be interpreted by the browser.
+
+Vulnerable line of code (`templates/search_reflected.html`):
+```html
+{{ search_query | safe }}
+```
+
+### Exploitation Steps
+1. Ensure the vulnerability mode is active (Footer should read "Mode: VULNERABLE").
+2. Instead of navigating to the page normally, construct a malicious URL in your browser's address bar:
+   `http://127.0.0.1:5000/search_reflected?query=<script>alert(document.cookie)</script>`
+3. Hit Enter to visit the URL.
+
+**The Difference from Stored XSS:**
+Unlike the Guestbook module, this payload is **never saved to the database**. It is immediately "reflected" off the web server back into the HTTP response. Because it isn't stored, the payload *only* executes for the person who actually visits that specific crafted link. To exploit this in the real world, an attacker must use **social engineering or phishing** to trick a victim into clicking the malicious URL.
+
+### Impact
+- **Severity:** High
+- **Gain:** Client-side code execution. While slightly harder to deliver en masse compared to Stored XSS (which hits every visitor automatically), a successful phishing campaign utilizing a Reflected XSS link still yields the exact same impact: stolen session cookies, hijacked accounts, and forced client-side actions.
+
+### Fix Applied
+The patched version removes the `| safe` filter from the Jinja2 template, reverting to the framework's secure defaults.
+
+Patched code (`templates/search_reflected.html`):
+```html
+{{ search_query }}
+```
+Jinja2's context-aware auto-escaping securely translates the injected HTML tags into benign text entities (e.g., `<` becomes `&lt;`), rendering the reflection completely harmless.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["xss"]` (Shares the general XSS toggle)
+- Set to `True` to use the `| safe` filter (disabling auto-escaping).
+- Set to `False` to rely on Jinja2's default auto-escaping (safely rendering HTML).

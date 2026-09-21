@@ -158,3 +158,34 @@ details code {
 .results-table tr:hover {
     background-color: #f1f1f1;
 }
+
+/* Guestbook Comments Styles */
+.comment-item {
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #0056b3;
+}
+
+.comment-item h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.comment-item p {
+    margin: 0;
+    color: #555;
+    word-break: break-word; /* Prevents long unbroken payloads from overflowing the card */
+}
+
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: inherit;
+    resize: vertical;
+}

@@ -2,8 +2,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from sqlalchemy import text
 from config import VULN_MODE
-from models import db, User
+from models import db, User, server_sessions
 from werkzeug.security import check_password_hash
+import uuid
 
 sqli_bp = Blueprint('sqli', __name__)
 
@@ -23,9 +24,18 @@ def login():
             result = db.session.execute(text(query)).fetchone()
             
             if result:
-                # Result is a Row object. Access by index: 0=id, 1=username
-                session['user_id'] = result[0]
-                session['username'] = result[1]
+                # Session Fixation / Hijacking Logic
+                if VULN_MODE.get("session", True):
+                    # VULNERABLE: Reuse existing session ID (Fixation)
+                    if 'session_id' not in session:
+                        session['session_id'] = str(uuid.uuid4())
+                else:
+                    # PATCHED: Clear session completely and generate a new session ID
+                    session.clear()
+                    session['session_id'] = str(uuid.uuid4())
+                
+                # Store auth state server-side tied to this session_id
+                server_sessions[session['session_id']] = {'user_id': result[0], 'username': result[1]}
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid username or password', 'error')
@@ -37,8 +47,14 @@ def login():
             
             # Safely verify the password hash
             if user and check_password_hash(user.password_hash, password):
-                session['user_id'] = user.id
-                session['username'] = user.username
+                if VULN_MODE.get("session", True):
+                    if 'session_id' not in session:
+                        session['session_id'] = str(uuid.uuid4())
+                else:
+                    session.clear()
+                    session['session_id'] = str(uuid.uuid4())
+                    
+                server_sessions[session['session_id']] = {'user_id': user.id, 'username': user.username}
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid username or password', 'error')

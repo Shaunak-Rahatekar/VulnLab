@@ -3,6 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 
+# In-memory server-side session storage to demonstrate Fixation.
+# Keys are session IDs, values are dicts containing user data.
+server_sessions = {}
+
 db = SQLAlchemy()
 
 class User(db.Model):

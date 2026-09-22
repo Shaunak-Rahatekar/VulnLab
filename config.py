@@ -8,4 +8,5 @@ VULN_MODE = {
     "xss": True,
     "session": True,
     "csrf": True,
+    "upload": True,
 }

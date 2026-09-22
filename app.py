@@ -7,6 +7,7 @@ from modules.search import search_bp
 from modules.xss import xss_bp
 from modules.session_hijack import session_bp
 from modules.csrf_module import csrf_bp
+from modules.upload_module import upload_bp
 from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
@@ -36,6 +37,7 @@ csrf.exempt(sqli_bp)
 csrf.exempt(search_bp)
 csrf.exempt(xss_bp)
 csrf.exempt(session_bp)
+csrf.exempt(upload_bp)
 
 # Initialize the database
 db.init_app(app)
@@ -46,6 +48,7 @@ app.register_blueprint(search_bp)
 app.register_blueprint(xss_bp)
 app.register_blueprint(session_bp)
 app.register_blueprint(csrf_bp)
+app.register_blueprint(upload_bp)
 
 # Create tables and seed data upon startup
 with app.app_context():

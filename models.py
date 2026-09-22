@@ -37,13 +37,11 @@ def seed_db():
         user1 = User(
             username='admin', 
             email='admin@vulnlab.local',
-            password='adminpassword', 
             password_hash=generate_password_hash('adminpassword')
         )
         user2 = User(
             username='johndoe', 
             email='john@vulnlab.local',
-            password='password123', 
             password_hash=generate_password_hash('password123')
         )
         db.session.add_all([user1, user2])

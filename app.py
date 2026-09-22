@@ -8,6 +8,7 @@ from modules.xss import xss_bp
 from modules.session_hijack import session_bp
 from modules.csrf_module import csrf_bp
 from modules.upload_module import upload_bp
+from modules.detector import detector_bp, init_detector
 from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
@@ -49,6 +50,10 @@ app.register_blueprint(xss_bp)
 app.register_blueprint(session_bp)
 app.register_blueprint(csrf_bp)
 app.register_blueprint(upload_bp)
+app.register_blueprint(detector_bp)
+
+# Initialize the WAF detection middleware
+init_detector(app)
 
 # Create tables and seed data upon startup
 with app.app_context():

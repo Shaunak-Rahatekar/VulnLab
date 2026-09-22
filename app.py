@@ -6,6 +6,8 @@ from modules.sqli import sqli_bp
 from modules.search import search_bp
 from modules.xss import xss_bp
 from modules.session_hijack import session_bp
+from modules.csrf_module import csrf_bp
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_key_for_vulnlab_sandbox'
@@ -14,12 +16,26 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Session Cookie Configuration based on VULN_MODE
 if VULN_MODE.get("session", True):
-    # VULNERABLE: Cookies accessible via JS and sent over HTTP
+    # VULNERABLE: Cookies accessible via JS and sent over HTTP (Lax allows some cross-site logic but we use None for max vulnerability)
     app.config['SESSION_COOKIE_HTTPONLY'] = False
 else:
-    # PATCHED: Cookies hidden from JS (blocks XSS hijacking)
+    # PATCHED: Cookies hidden from JS (blocks XSS hijacking), and strictly prevented cross-site (blocks CSRF)
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
+    
+# Initialize CSRF Protection
+csrf = CSRFProtect(app)
+
+if VULN_MODE.get("csrf", True):
+    app.config['WTF_CSRF_ENABLED'] = False
+else:
+    app.config['WTF_CSRF_ENABLED'] = True
+
+# Exempt other blueprints from CSRF protection so they don't break in patched mode
+csrf.exempt(sqli_bp)
+csrf.exempt(search_bp)
+csrf.exempt(xss_bp)
+csrf.exempt(session_bp)
 
 # Initialize the database
 db.init_app(app)
@@ -29,6 +45,7 @@ app.register_blueprint(sqli_bp)
 app.register_blueprint(search_bp)
 app.register_blueprint(xss_bp)
 app.register_blueprint(session_bp)
+app.register_blueprint(csrf_bp)
 
 # Create tables and seed data upon startup
 with app.app_context():

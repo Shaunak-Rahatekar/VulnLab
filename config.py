@@ -7,4 +7,5 @@ VULN_MODE = {
     "sqli": True,
     "xss": True,
     "session": True,
+    "csrf": True,
 }

@@ -13,10 +13,9 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    # The plain password column exists here solely so the vulnerable SQL query 
-    # (which compares password='{password}') works for legitimate logins as well.
-    password = db.Column(db.String(50), nullable=False) 
-    password_hash = db.Column(db.String(256), nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    password_hash = db.Column(db.String(120), nullable=False)
 
 class Product(db.Model):
     __tablename__ = 'products'
@@ -37,11 +36,13 @@ def seed_db():
     if User.query.first() is None:
         user1 = User(
             username='admin', 
+            email='admin@vulnlab.local',
             password='adminpassword', 
             password_hash=generate_password_hash('adminpassword')
         )
         user2 = User(
             username='johndoe', 
+            email='john@vulnlab.local',
             password='password123', 
             password_hash=generate_password_hash('password123')
         )

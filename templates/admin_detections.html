@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAF Detections - VulnLab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Auto-refresh the page every 3 seconds for a live demo experience -->
+    <meta http-equiv="refresh" content="3">
+    
+    <style>
+        .detections-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .detections-table th, .detections-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .detections-table th {
+            background-color: #2c3e50;
+            color: white;
+            font-family: sans-serif;
+        }
+        .detections-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .detections-table tr:hover {
+            background-color: #f1f1f1;
+        }
+        .severity-high {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .auto-refresh-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            vertical-align: middle;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" style="max-width: 1100px; margin: 2rem auto;">
+        <h2 style="display: flex; align-items: center;">
+            Security Detections (Live WAF Logs)
+            <span class="auto-refresh-badge">Live • Auto-Refreshing</span>
+        </h2>
+        
+        <p>This dashboard monitors requests flagged by the Web Application Firewall (WAF) middleware.</p>
+        
+        <table class="detections-table">
+            <thead>
+                <tr>
+                    <th style="width: 20%">Timestamp</th>
+                    <th style="width: 15%">Source IP</th>
+                    <th style="width: 25%">Matched Attack Pattern</th>
+                    <th style="width: 40%">Offending Parameter (Payload)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if detections %}
+                    {% for detection in detections %}
+                    <tr>
+                        <td>{{ detection.timestamp }}</td>
+                        <td>{{ detection.source_ip }}</td>
+                        <td class="severity-high">{{ detection.attack_pattern }}</td>
+                        <td style="word-break: break-all;">
+                            <code style="background-color: #eee; padding: 2px 4px; border-radius: 3px;">
+                                {{ detection.parameter }}
+                            </code>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #777; padding: 30px; font-style: italic; font-family: sans-serif;">
+                            Monitoring active... No malicious activity detected yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <footer style="margin-top: 40px;">
+        <p>VulnLab — Educational Security Sandbox.</p>
+        <p><a href="/dashboard">Back to Dashboard</a></p>
+    </footer>
+</body>
+</html>

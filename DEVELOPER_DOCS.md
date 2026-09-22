@@ -302,3 +302,84 @@ While `SameSite` cookies provide excellent ambient protection against CSRF, olde
 - **Config Flag:** `config.VULN_MODE["csrf"]`
 - Set to `True` to disable `Flask-WTF` CSRF validation and leave the session cookie susceptible to cross-site transmission.
 - Set to `False` to mandate CSRF tokens on all POST requests and enforce the `SameSite='Strict'` cookie policy.
+
+---
+
+## Page 6: Upload Profile Picture — Insecure File Upload
+
+### Page Structure
+- **Route Path:** `/upload`
+- **Template File:** `templates/upload.html`
+- **Form Fields:** `profile_pic` (file input)
+- **Backend File/Function Involved:** `modules/upload_module.py` -> `upload()` route function
+
+### Vulnerability Type & OWASP Category
+Insecure File Upload — **A04:2021-Insecure Design** (often leading to Injection or RCE)
+
+### Root Cause
+This module demonstrates two distinct, compounding flaws in how the application handles file uploads:
+
+1. **Trusting Client-Supplied Data:** The backend application explicitly trusts the filename, extension, and HTTP `Content-Type` provided by the user's browser. It either skips validation or utilizes a naive blacklist (e.g., blocking `.php` but allowing `.php5` or `.py`). It fails to analyze the actual raw bytes of the file (magic bytes) to verify its true format.
+2. **Web-Servable Storage Location:** The application saves the uploaded file directly into the `static/uploads/` directory, which is configured to be publicly accessible by the web server. It also preserves the user's original filename rather than renaming the file to an unpredictable UUID.
+
+### Exploitation Steps
+1. Ensure you are logged into VulnLab.
+2. Open a separate terminal and execute the automated attack script: `python attacks/upload_attack.py`
+3. The script crafts a malicious HTTP request that packages a Python script (`shell.py`) but spoofs the HTTP `Content-Type` header to claim it is a harmless `image/png`.
+4. Because the vulnerable backend does not deeply inspect the file contents, it blindly accepts the payload.
+5. The script then demonstrates the second flaw by making a direct GET request to `http://127.0.0.1:5000/static/uploads/shell.py`. The web server publicly serves the malicious file.
+
+### Impact
+- **Severity:** Critical
+- **Gain:** Remote Code Execution (RCE).
+- **PoC vs Reality:** In this specific sandbox environment, the automated script successfully proves the *validation bypass* by retrieving the source code of the uploaded `shell.py` file. However, if this were a real-world misconfigured web server (such as an Apache server configured to execute `.php` files, or an environment susceptible to local file inclusion), navigating to that public URL would instruct the server to *execute* the script rather than just display it. This educational project intentionally stops at proving the upload bypass is possible, rather than providing a weaponized, executing webshell.
+
+### Fix Applied
+The patched version mitigates the risk by enforcing strict defense-in-depth measures:
+
+1. **Strict Extension Whitelisting:** The file extension is checked against a strict whitelist (e.g., only `.jpg`, `.png`, `.gif`).
+2. **Content/Magic Byte Validation:** The `python-magic` library is utilized to parse the first 2048 bytes of the uploaded file to securely verify its true MIME type, regardless of what the user's HTTP headers claim.
+3. **Randomized Renaming:** The file is completely stripped of its original name and assigned a random UUID to prevent directory traversal attacks or filename guessing.
+4. **Non-Servable Storage Directory:** The file is saved to an internal `safe_uploads/` directory that is strictly segregated from the public `static/` directory. Files can only be accessed through an authenticated, controlled backend route (`/serve_file/`) rather than direct URL access.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["upload"]`
+- Set to `True` to enable blind file processing and public static storage.
+- Set to `False` to mandate `python-magic` content validation, UUID renaming, and protected storage.
+
+---
+
+## Page 8: Admin Detection Log — Blue-Team Logging Layer
+
+### Page Structure
+- **Route Path:** `/admin/detections`
+- **Template File:** `templates/admin_detections.html`
+- **Form Fields:** N/A (Live Auto-Refreshing Dashboard)
+- **Backend File/Function Involved:** `modules/detector.py`
+
+### Feature Overview
+This module acts as a passive Web Application Firewall (WAF) and detection middleware. While Pages 1 through 7 focus on the *Offensive* (Red Team) perspective and root-cause code analysis, Page 8 provides the *Defensive* (Blue Team) perspective. It ties the entire project together by allowing you to execute the exploits from previous pages in one browser window, while simultaneously watching a security operations dashboard light up with real-time alerts in another.
+
+### What is Detected?
+The `before_request` hook intercepts every incoming HTTP request and scans the URL query parameters (`request.args`) and POST form data (`request.form`) against a dictionary of known malicious Regex signatures. Currently, it detects the payloads utilized in the rest of the sandbox:
+- **SQLi (Auth Bypass):** `' OR '1'='1`
+- **SQLi (UNION):** `UNION SELECT`
+- **XSS (Script Tag):** `<script>`
+- **XSS (JavaScript URI):** `javascript:`
+- **XSS (Fetch Payload):** `fetch(`
+- **Session Hijacking/XSS:** `document.cookie`
+
+When a match is found, the middleware logs the exact timestamp, the attacker's source IP, the matched pattern name, and the raw offending payload to both an in-memory queue and a persistent `detections.log` file.
+
+### The Limitation of Signature-Based Detection
+This educational WAF deliberately relies on simple substring and regular expression matching (signature-based detection). It serves as a crucial teaching point regarding the limitations of rudimentary firewalls: **Signature-based detection is notoriously easy to bypass.** 
+
+Because it strictly looks for exact character sequences (like `<script>`), an attacker can easily bypass the filter using evasion techniques such as:
+- **Encoding:** URL encoding (`%3Cscript%3E`), HTML entity encoding, or Base64.
+- **Obfuscation:** Utilizing alternative tags/events (like `<img src=x onerror=alert(1)>` which avoids `<script>`), or exploiting varied SQL syntax (e.g., using `||` instead of `OR`, or adding inline SQL comments).
+
+Real-world, enterprise-grade Web Application Firewalls require much more than naive substring matching. They must utilize deep payload normalization (recursively decoding payloads *before* scanning them), semantic analysis, behavioral anomaly profiling, and machine learning to accurately detect and neutralize sophisticated, obfuscated attacks.
+
+### How to Toggle
+- **Config Flag:** N/A 
+- The detection middleware is always active globally. It intentionally operates in a "passive" mode—meaning it observes, flags, and logs the attack but does *not* block the HTTP request or drop the connection. This ensures that the vulnerable endpoints in the sandbox still successfully fire so you can verify the exploit works, while proving the defense layer saw it happen.

@@ -261,3 +261,44 @@ The patched version resolves both vulnerabilities simultaneously by implementing
 - **Config Flag:** `config.VULN_MODE["session"]`
 - Set to `True` to disable secure cookie flags and reuse session IDs on login.
 - Set to `False` to enforce `HttpOnly`/`SameSite` flags and regenerate session IDs securely.
+
+---
+
+## Page 5: Profile / Change Email — Cross-Site Request Forgery (CSRF)
+
+### Page Structure
+- **Route Path:** `/profile` (GET) and `/change-email` (POST)
+- **Template File:** `templates/profile.html`
+- **Form Fields:** `new_email`
+- **Backend File/Function Involved:** `modules/csrf_module.py` -> `change_email()` route function
+
+### Vulnerability Type & OWASP Category
+Cross-Site Request Forgery (CSRF) — **A01:2021-Broken Access Control**
+
+### Root Cause
+The vulnerability exists because the server accepts state-changing POST requests exclusively based on the presence of a valid session cookie. By default, web browsers automatically attach cookies to cross-origin requests. Since the server does not enforce a secondary, unpredictable mechanism (like a CSRF token) to verify that the request intentionally originated from the legitimate frontend application, it blindly trusts and processes forged requests initiated by malicious third-party sites.
+
+### Exploitation Steps
+1. As a victim, log into VulnLab normally and navigate to `http://127.0.0.1:5000/profile`. Notice your current email address.
+2. In the same browser window (e.g. a new tab), open the `attacks/csrf_attack.html` file. This simulates a scenario where the victim clicks a malicious link and visits a completely different website controlled by an attacker.
+3. The malicious site instantly and silently executes an invisible, auto-submitting POST form directed at `http://localhost:5000/change-email`.
+4. Because the browser automatically attaches the victim's VulnLab session cookie to this forged request, the backend server mistakenly authenticates the action as the victim.
+5. Go back to your VulnLab profile tab and refresh the page. Your email address has been successfully changed to `attacker@evil.com` without your explicit consent or knowledge!
+
+### Impact
+- **Severity:** High
+- **Gain:** Unauthorized state modification. An attacker can force a victim's browser to execute unintended actions on the application, such as changing their email (which could subsequently lead to an account takeover via a password reset flow), transferring funds, or altering critical account settings.
+
+### Fix Applied
+The patched version resolves the vulnerability using a defense-in-depth strategy combining two distinct layers:
+
+1. **Synchronizer Token Pattern (CSRF Tokens):** The `Flask-WTF` extension is utilized to generate a cryptographically secure, unpredictable, and unique token (`csrf_token`) when rendering the `profile.html` form. When a POST request is submitted, the server validates that this token is present and correct. Since a third-party attacker site cannot read the token from the victim's application (due to the browser's Same-Origin Policy), they cannot include it in their forged request, and the server rejects it.
+2. **`SameSite=Strict` Cookie Flag:** The session cookie is explicitly configured with `SameSite='Strict'`. This instructs the modern web browser to *never* attach the session cookie to cross-origin POST requests. If the attacker's site attempts to POST to the endpoint, the request arrives at the server completely unauthenticated.
+
+**Why relying on just one is weaker:** 
+While `SameSite` cookies provide excellent ambient protection against CSRF, older browsers or specific cross-site navigation scenarios might still transmit the cookie. Conversely, relying solely on CSRF tokens leaves the application vulnerable if an XSS vulnerability exists on the domain (which could allow an attacker to read the token). Utilizing both forms a highly robust defense-in-depth posture.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["csrf"]`
+- Set to `True` to disable `Flask-WTF` CSRF validation and leave the session cookie susceptible to cross-site transmission.
+- Set to `False` to mandate CSRF tokens on all POST requests and enforce the `SameSite='Strict'` cookie policy.

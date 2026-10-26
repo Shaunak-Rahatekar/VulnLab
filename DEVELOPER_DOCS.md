@@ -5,21 +5,21 @@ Welcome to the VulnLab Developer Documentation. This guide is designed for devel
 This project uses a centralized configuration file (`config.py`) containing a `VULN_MODE` dictionary. This allows you to selectively toggle individual vulnerability categories on or off. By toggling these flags (e.g., `"sqli": True`), you can immediately reproduce every vulnerable-vs-patched comparison yourself and verify the effectiveness of the implemented fixes.
 
 ## Table of Contents
-| Level / Page | Vulnerability / Topic | Syllabus Unit & OWASP Category | Toggle Flag |
+| Level / Page | Vulnerability / Topic | OWASP Category | Toggle Flag |
 |---|---|---|---|
-| [Page 1: Login](#page-1-login--sql-injection-authentication-bypass) | SQL Injection (Auth Bypass) | Unit IV / A03:2021-Injection | `"sqli"` |
-| [Page 2: Product Search](#page-2-product-search--sql-injection-union-based-data-extraction) | SQL Injection (UNION) | Unit IV / A03:2021-Injection | `"sqli"` |
-| [Page 3: Comments](#page-3-comments--stored-cross-site-scripting-xss) | Stored XSS | Unit IV / A03:2021-Injection | `"xss"` |
-| [Page 4: Reflected Search](#page-4-reflected-search--reflected-xss) | Reflected XSS | Unit IV / A03:2021-Injection | `"xss"` |
-| [Page 5: Profile](#page-5-profile--change-email--cross-site-request-forgery-csrf) | CSRF | Unit IV / A01:2021-Broken Access Control | `"csrf"` |
-| [Page 6: File Upload](#page-6-upload-profile-picture--insecure-file-upload) | Insecure File Upload | Unit IV / A04:2021-Insecure Design | `"upload"` |
-| [Page 7: Dashboard](#page-7-dashboard--session-hijacking--session-fixation) | Session Hijacking & Fixation | Unit III / A07:2021-Auth Failures | `"session"` |
-| [Page 8: Document Viewer](#page-8-document-viewer--directory-traversal--local-file-inclusion-lfi) | Directory Traversal & LFI | Unit IV / A01:2021-Broken Access Control | `"traversal"` |
-| [Page 9: Security Headers](#page-9-http-security-headers--clickjacking-audit) | HTTP Security Headers & Clickjacking | Unit IV / A05:2021-Security Misconfiguration | `"headers"` |
-| [Page 10: Brute Force](#page-10-authentication-brute-force--rate-limiting) | Password Attacks & Rate Limiting | Unit III / A07:2021-Auth Failures | `"bruteforce"` |
-| [Page 11: Reconnaissance](#page-11-footprinting-reconnaissance--information-disclosure) | Information Disclosure & OSINT | Unit II / Reconnaissance & Scanning | `"recon"` |
-| [Page 12: WAF & IPS Dashboard](#page-12-admin-detection-log--waf--ips-defense-layer) | WAF / IDS / IPS Layer | Unit III / Network Security Controls | `"waf_mode"` |
-| [Page 13: Pentest Report](#page-13-automated-penetration-testing-executive-report) | Pentest Reporting & Risk Rating | Unit V / Penetration Testing & Defense | *Dynamic* |
+| [Page 1: Login](#page-1-login--sql-injection-authentication-bypass) | SQL Injection (Auth Bypass) | A03:2021-Injection | `"sqli"` |
+| [Page 2: Product Search](#page-2-product-search--sql-injection-union-based-data-extraction) | SQL Injection (UNION) | A03:2021-Injection | `"sqli"` |
+| [Page 3: Comments](#page-3-comments--stored-cross-site-scripting-xss) | Stored XSS | A03:2021-Injection | `"xss"` |
+| [Page 4: Reflected Search](#page-4-reflected-search--reflected-xss) | Reflected XSS | A03:2021-Injection | `"xss"` |
+| [Page 5: Profile](#page-5-profile--change-email--cross-site-request-forgery-csrf) | CSRF | A01:2021-Broken Access Control | `"csrf"` |
+| [Page 6: File Upload](#page-6-upload-profile-picture--insecure-file-upload) | Insecure File Upload | A04:2021-Insecure Design | `"upload"` |
+| [Page 7: Dashboard](#page-7-dashboard--session-hijacking--session-fixation) | Session Hijacking & Fixation | A07:2021-Auth Failures | `"session"` |
+| [Page 8: Document Viewer](#page-8-document-viewer--directory-traversal--local-file-inclusion-lfi) | Directory Traversal & LFI | A01:2021-Broken Access Control | `"traversal"` |
+| [Page 9: Security Headers](#page-9-http-security-headers--clickjacking-audit) | HTTP Security Headers & Clickjacking | A05:2021-Security Misconfiguration | `"headers"` |
+| [Page 10: Brute Force](#page-10-authentication-brute-force--rate-limiting) | Password Attacks & Rate Limiting | A07:2021-Auth Failures | `"bruteforce"` |
+| [Page 11: Reconnaissance](#page-11-footprinting-reconnaissance--information-disclosure) | Information Disclosure & OSINT | Reconnaissance & Scanning | `"recon"` |
+| [Page 12: WAF & IPS Dashboard](#page-12-admin-detection-log--waf--ips-defense-layer) | WAF / IDS / IPS Layer | Network Security Controls | `"waf_mode"` |
+| [Page 13: Pentest Report](#page-13-automated-penetration-testing-executive-report) | Pentest Reporting & Risk Rating | Penetration Testing & Defense | *Dynamic* |
 
 ---
 
@@ -418,7 +418,7 @@ Real-world, enterprise-grade Web Application Firewalls require much more than na
 - **Backend File/Function Involved:** `modules/file_inclusion.py` -> `view_doc()`
 
 ### Vulnerability Type & OWASP Category
-Directory Traversal & Local File Inclusion — **Unit IV / A01:2021-Broken Access Control**
+Directory Traversal & Local File Inclusion — **A01:2021-Broken Access Control**
 
 ### Root Cause
 The application accepts user-controlled file path inputs directly from the query string and concatenates them with the document folder without path canonicalization:
@@ -460,7 +460,7 @@ Because relative path sequences (`../`) are not stripped, an attacker can climb 
 - **Backend File/Function Involved:** `modules/security_headers.py`, `app.py` (`apply_security_headers`)
 
 ### Vulnerability Type & OWASP Category
-Security Misconfiguration — **Unit IV / A05:2021-Security Misconfiguration**
+Security Misconfiguration — **A05:2021-Security Misconfiguration**
 
 ### Root Cause
 Missing defense-in-depth HTTP response headers (`X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`, `Strict-Transport-Security`). Without `X-Frame-Options`, third-party domains can frame the application inside hidden `<iframe>` tags, enabling Clickjacking (UI Redressing) attacks.
@@ -492,7 +492,7 @@ Global middleware in `app.py` enforces baseline hardening headers:
 - **Backend File/Function Involved:** `modules/bruteforce.py`
 
 ### Vulnerability Type & OWASP Category
-Identification and Authentication Failures — **Unit III / A07:2021-Auth Failures**
+Identification and Authentication Failures — **A07:2021-Auth Failures**
 
 ### Root Cause
 The authentication route lacks rate-limiting thresholds, progressive delays, and account lockout controls. Attackers can automate dictionary or credential stuffing attacks without restriction.
@@ -521,7 +521,7 @@ The authentication route lacks rate-limiting thresholds, progressive delays, and
 - **Backend File/Function Involved:** `modules/recon.py`
 
 ### Vulnerability Type & OWASP Category
-Information Disclosure — **Unit II: Reconnaissance & Scanning**
+Information Disclosure — **Reconnaissance & Scanning**
 
 ### Root Cause
 Publicly accessible `robots.txt` leaks administrative paths; sensitive backup files (`.bak`) remain in the public web root; verbose server headers advertise backend technologies.
@@ -550,5 +550,5 @@ Publicly accessible `robots.txt` leaks administrative paths; sensitive backup fi
 - **Backend File/Function Involved:** `modules/report.py`
 
 ### Feature Overview
-Directly aligns with **Unit V (Penetration Testing Framework, Report Writing, Executive Summary, Risk Rating, Remediation)**. Dynamically evaluates all 11 vulnerability modules, calculates CVSS v3.1 severity metrics, tracks verified exploit completion status, and provides technical proof of concepts and code remediations. Features an instant PDF export button (`window.print()`).
+Directly aligns with standard **Penetration Testing Execution Standards (PTES)**. Dynamically evaluates all 11 vulnerability modules, calculates CVSS v3.1 severity metrics, tracks verified exploit completion status, and provides technical proof of concepts and code remediations. Features an instant PDF export button (`window.print()`).
 

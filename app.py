@@ -78,7 +78,7 @@ app.register_blueprint(report_bp)
 app.register_blueprint(admin_mgr_bp)
 app.register_blueprint(detector_bp)
 
-# Apply global security headers middleware (Unit IV: Security Headers)
+# Apply global security headers middleware
 @app.after_request
 def apply_security_headers(response):
     if not VULN_MODE.get("headers", True):
@@ -89,7 +89,7 @@ def apply_security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     else:
-        # VULNERABLE: Omit hardening headers and leak server banner (Unit II: Reconnaissance)
+        # VULNERABLE: Omit hardening headers and leak server banner
         response.headers['Server'] = 'Werkzeug/3.0.1 Python/3.11'
         response.headers['X-Powered-By'] = 'VulnLab-Educational-Platform'
     return response

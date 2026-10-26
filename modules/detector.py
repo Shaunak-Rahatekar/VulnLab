@@ -9,7 +9,7 @@ detector_bp = Blueprint('detector', __name__)
 # In-memory list to store recent detections for the dashboard
 detections_log_memory = []
 
-# Regex signatures for attacks demonstrated across the syllabus units
+# Regex signatures for attacks demonstrated in this lab
 SIGNATURES = {
     "SQLi (Auth Bypass)": r"' OR '1'='1",
     "SQLi (UNION)": r"(?i)UNION\s+SELECT",
@@ -80,7 +80,7 @@ def init_detector(app):
                         <strong>Client IP:</strong> {ip}<br>
                         <strong>Action Taken:</strong> Request Dropped (HTTP 403)
                     </div>
-                    <p style="font-size: 0.85em; color: #888;">Unit III: Network Security Controls, Firewalls & IPS Basics</p>
+                    <p style="font-size: 0.85em; color: #888;">Network Security Controls, Firewalls & IPS Basics</p>
                     <a href="/admin/detections" style="color: #2980b9; text-decoration: none; font-weight: bold;">← View WAF Dashboard</a>
                 </div>
             </body>

@@ -1,6 +1,6 @@
 # VulnLab - Comprehensive Testing Guide
 
-Welcome to **VulnLab**, an educational security sandbox designed to demonstrate common web application vulnerabilities, their root causes, and how to patch them according to the university Ethical Hacking curriculum (Units I – V).
+Welcome to **VulnLab**, an educational security sandbox designed to demonstrate common web application vulnerabilities, their root causes, and how to patch them covering major web application security standards and the OWASP Top 10.
 
 This guide walks you through installing the lab, running the server, toggling defenses, and testing every vulnerability.
 
@@ -34,23 +34,23 @@ You can toggle vulnerabilities in two ways:
 
 ---
 
-## 🎯 Vulnerability Menu & Syllabus Navigation
+## 🎯 Vulnerability Menu & Navigation Guide
 
-| Level | Page Name | Route | Syllabus Unit | Vulnerability Category | Exploitation Script/Method |
-|:---:|---|---|:---:|---|---|
-| **1** | Login Page | `/login` | Unit IV | SQLi (Authentication Bypass) | Manual Payload (`' OR '1'='1`) |
-| **2** | Product Search | `/search` | Unit IV | SQLi (UNION Data Extraction) | Manual Payload (`' UNION SELECT ...`) |
-| **3** | Guestbook Comments | `/comments` | Unit IV | Stored Cross-Site Scripting (XSS) | `<script>fetch(...)</script>` |
-| **4** | Quick Search | `/search_reflected` | Unit IV | Reflected Cross-Site Scripting (XSS) | URL Query String Reflection |
-| **5** | Account Profile | `/profile` | Unit IV | Cross-Site Request Forgery (CSRF) | `attacks/csrf_attack.html` |
-| **6** | Profile Picture | `/upload` | Unit IV | Insecure File Upload | `attacks/upload_attack.py` |
-| **7** | Dashboard | `/dashboard` | Unit III | Session Hijacking & Fixation | `attacks/session_fixation.py` |
-| **8** | Document Viewer | `/view_doc` | Unit IV | Directory Traversal & LFI | `attacks/traversal_attack.py` |
-| **9** | Security Headers | `/security_headers` | Unit IV | Missing Security Headers & Clickjacking | Interactive Frame Simulation |
-| **10** | Brute Force Login | `/login_bruteforce` | Unit III | Password Attacks & Lack of Rate Limiting | `attacks/bruteforce_attack.py` |
-| **11** | Recon Workbench | `/recon` | Unit II | Reconnaissance & Information Disclosure | `/robots.txt`, `/config.py.bak` |
-| **🛡️** | WAF & IPS Dashboard | `/admin/detections` | Unit III | Passive IDS Logging vs Active IPS 403 | Real-time event log & toggle |
-| **📊** | Pentest Report | `/report` | Unit V | Pentest Reporting & Risk Rating | Printable Executive Summary & CVSS |
+| Level | Page Name | Route | Vulnerability Category | Exploitation Script/Method |
+|:---:|---|---|---|---|
+| **1** | Login Page | `/login` | SQLi (Authentication Bypass) | Manual Payload (`' OR '1'='1`) |
+| **2** | Product Search | `/search` | SQLi (UNION Data Extraction) | Manual Payload (`' UNION SELECT ...`) |
+| **3** | Guestbook Comments | `/comments` | Stored Cross-Site Scripting (XSS) | `<script>fetch(...)</script>` |
+| **4** | Quick Search | `/search_reflected` | Reflected Cross-Site Scripting (XSS) | URL Query String Reflection |
+| **5** | Account Profile | `/profile` | Cross-Site Request Forgery (CSRF) | `attacks/csrf_attack.html` |
+| **6** | Profile Picture | `/upload` | Insecure File Upload | `attacks/upload_attack.py` |
+| **7** | Dashboard | `/dashboard` | Session Hijacking & Fixation | `attacks/session_fixation.py` |
+| **8** | Document Viewer | `/view_doc` | Directory Traversal & LFI | `attacks/traversal_attack.py` |
+| **9** | Security Headers | `/security_headers` | Missing Security Headers & Clickjacking | Interactive Frame Simulation |
+| **10** | Brute Force Login | `/login_bruteforce` | Password Attacks & Lack of Rate Limiting | `attacks/bruteforce_attack.py` |
+| **11** | Recon Workbench | `/recon` | Reconnaissance & Information Disclosure | `/robots.txt`, `/config.py.bak` |
+| **🛡️** | WAF & IPS Dashboard | `/admin/detections` | Passive IDS Logging vs Active IPS 403 | Real-time event log & toggle |
+| **📊** | Pentest Report | `/report` | Pentest Reporting & Risk Rating | Printable Executive Summary & CVSS |
 
 ---
 

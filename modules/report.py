@@ -8,7 +8,6 @@ VULNERABILITIES_DB = [
     {
         "id": 1,
         "title": "SQL Injection (Authentication Bypass)",
-        "unit": "Unit IV",
         "owasp": "A03:2021 - Injection",
         "severity": "CRITICAL",
         "cvss": "9.8",
@@ -22,7 +21,6 @@ VULNERABILITIES_DB = [
     {
         "id": 2,
         "title": "SQL Injection (UNION-Based Data Extraction)",
-        "unit": "Unit IV",
         "owasp": "A03:2021 - Injection",
         "severity": "HIGH",
         "cvss": "8.6",
@@ -36,7 +34,6 @@ VULNERABILITIES_DB = [
     {
         "id": 3,
         "title": "Stored Cross-Site Scripting (XSS)",
-        "unit": "Unit IV",
         "owasp": "A03:2021 - Injection",
         "severity": "HIGH",
         "cvss": "8.0",
@@ -50,7 +47,6 @@ VULNERABILITIES_DB = [
     {
         "id": 4,
         "title": "Reflected Cross-Site Scripting (XSS)",
-        "unit": "Unit IV",
         "owasp": "A03:2021 - Injection",
         "severity": "MEDIUM",
         "cvss": "6.1",
@@ -64,7 +60,6 @@ VULNERABILITIES_DB = [
     {
         "id": 5,
         "title": "Cross-Site Request Forgery (CSRF)",
-        "unit": "Unit IV",
         "owasp": "A01:2021 - Broken Access Control",
         "severity": "HIGH",
         "cvss": "7.5",
@@ -78,7 +73,6 @@ VULNERABILITIES_DB = [
     {
         "id": 6,
         "title": "Insecure File Upload & Path Validation",
-        "unit": "Unit IV",
         "owasp": "A04:2021 - Insecure Design",
         "severity": "CRITICAL",
         "cvss": "9.0",
@@ -92,7 +86,6 @@ VULNERABILITIES_DB = [
     {
         "id": 7,
         "title": "Session Hijacking & Session Fixation",
-        "unit": "Unit III",
         "owasp": "A07:2021 - Identification & Auth Failures",
         "severity": "HIGH",
         "cvss": "8.1",
@@ -106,7 +99,6 @@ VULNERABILITIES_DB = [
     {
         "id": 8,
         "title": "Directory Traversal & Local File Inclusion",
-        "unit": "Unit IV",
         "owasp": "A01:2021 - Broken Access Control",
         "severity": "HIGH",
         "cvss": "7.5",
@@ -120,7 +112,6 @@ VULNERABILITIES_DB = [
     {
         "id": 9,
         "title": "Missing HTTP Security Headers & Clickjacking",
-        "unit": "Unit IV",
         "owasp": "A05:2021 - Security Misconfiguration",
         "severity": "MEDIUM",
         "cvss": "6.5",
@@ -134,7 +125,6 @@ VULNERABILITIES_DB = [
     {
         "id": 10,
         "title": "Authentication Brute-Force & Lack of Rate Limiting",
-        "unit": "Unit III",
         "owasp": "A07:2021 - Auth Failures",
         "severity": "HIGH",
         "cvss": "7.5",
@@ -148,7 +138,6 @@ VULNERABILITIES_DB = [
     {
         "id": 11,
         "title": "Information Disclosure & Reconnaissance Exposure",
-        "unit": "Unit II",
         "owasp": "A05:2021 - Security Misconfiguration",
         "severity": "MEDIUM",
         "cvss": "5.3",

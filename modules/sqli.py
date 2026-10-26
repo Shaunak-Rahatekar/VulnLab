@@ -20,8 +20,13 @@ def login():
             # Example payload: ' OR '1'='1
             query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
             
-            # Execute directly without sanitization or parameterization
-            result = db.session.execute(text(query)).fetchone()
+            try:
+                # Execute directly without sanitization or parameterization
+                result = db.session.execute(text(query)).fetchone()
+            except Exception as e:
+                # Catch SQL syntax / operational errors and display them gracefully
+                flash(f"Database Error: {str(e)}", "error")
+                return render_template('login.html', vuln_mode=VULN_MODE["sqli"])
             
             if result:
                 # Session Fixation / Hijacking Logic

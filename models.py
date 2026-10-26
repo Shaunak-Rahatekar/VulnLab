@@ -15,6 +15,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=True)
     profile_pic = db.Column(db.String(255), nullable=True)
+    password = db.Column(db.String(120), nullable=True) # Cleartext column used for vulnerable SQL query simulation
     password_hash = db.Column(db.String(120), nullable=False)
 
 class Product(db.Model):
@@ -37,11 +38,13 @@ def seed_db():
         user1 = User(
             username='admin', 
             email='admin@vulnlab.local',
+            password='adminpassword',
             password_hash=generate_password_hash('adminpassword')
         )
         user2 = User(
             username='johndoe', 
             email='john@vulnlab.local',
+            password='password123',
             password_hash=generate_password_hash('password123')
         )
         db.session.add_all([user1, user2])

@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  vulnlab:
+    build: .
+    container_name: vulnlab-sandbox
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./instance:/app/instance
+      - ./static/uploads:/app/static/uploads
+      - ./safe_uploads:/app/safe_uploads
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=development

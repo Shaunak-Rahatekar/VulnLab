@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - VulnLab</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <div class="card">
         <h2>VulnLab Login</h2>
         
@@ -54,5 +48,5 @@
         <p>VulnLab — Educational Security Sandbox.</p>
         <p>Mode: <strong>{% if vuln_mode %}VULNERABLE{% else %}PATCHED{% endif %}</strong></p>
     </footer>
-</body>
-</html>
+
+{% endblock %}

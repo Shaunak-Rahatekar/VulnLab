@@ -1,0 +1,13 @@
+CONFIDENTIAL INTERNAL MEMORANDUM
+================================
+To: VulnLab Development Staff
+From: Lead Security Architect
+Subject: Upcoming Security Audit & Staging Credentials
+
+Please note that our upcoming pen-testing audit begins this week. 
+Do not store production keys or database credentials in cleartext within config files or public directories!
+
+Current Internal Staging Access:
+Admin Emergency Bypass Pin: 98472-SECURE
+Dev API Secret Key: vulnlab_staging_key_884920482
+Database Backup Location: /database.db

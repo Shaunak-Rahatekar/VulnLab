@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VulnLab - Security Sandbox{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Menu -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>VulnLab</h2>
+            <p>Ethical Hacking Sandbox</p>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="{% if request.endpoint == 'sqli.login' %}active{% endif %}">
+                <a href="{{ url_for('sqli.login') }}">
+                    <span class="level-num">1</span> Login (SQLi)
+                    {% if 1 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'search.search' %}active{% endif %}">
+                <a href="{{ url_for('search.search') }}">
+                    <span class="level-num">2</span> Product Search
+                    {% if 2 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'xss.comments' %}active{% endif %}">
+                <a href="{{ url_for('xss.comments') }}">
+                    <span class="level-num">3</span> Guestbook (XSS)
+                    {% if 3 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'xss.search_reflected' %}active{% endif %}">
+                <a href="{{ url_for('xss.search_reflected') }}">
+                    <span class="level-num">4</span> Quick Search (XSS)
+                    {% if 4 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'csrf_module.profile' %}active{% endif %}">
+                <a href="{{ url_for('csrf_module.profile') }}">
+                    <span class="level-num">5</span> Profile (CSRF)
+                    {% if 5 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'upload_module.upload' %}active{% endif %}">
+                <a href="{{ url_for('upload_module.upload') }}">
+                    <span class="level-num">6</span> File Upload
+                    {% if 6 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <a href="{{ url_for('dashboard') }}">
+                    <span class="level-num">7</span> Dashboard (Hijack)
+                    {% if 7 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'file_inclusion.view_doc' %}active{% endif %}">
+                <a href="{{ url_for('file_inclusion.view_doc') }}">
+                    <span class="level-num">8</span> File Inclusion (LFI)
+                    {% if 8 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'security_headers.security_headers_view' %}active{% endif %}">
+                <a href="{{ url_for('security_headers.security_headers_view') }}">
+                    <span class="level-num">9</span> Security Headers
+                    {% if 9 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'bruteforce.login_bruteforce' %}active{% endif %}">
+                <a href="{{ url_for('bruteforce.login_bruteforce') }}">
+                    <span class="level-num">10</span> Brute Force (Auth)
+                    {% if 10 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'recon.recon_workbench' %}active{% endif %}">
+                <a href="{{ url_for('recon.recon_workbench') }}">
+                    <span class="level-num">11</span> Reconnaissance
+                    {% if 11 in completed_levels %}<span class="check">✅</span>{% endif %}
+                </a>
+            </li>
+            
+            <li class="spacer"></li>
+            
+            <li class="{% if request.endpoint == 'detector.view_detections' %}active{% endif %}">
+                <a href="{{ url_for('detector.view_detections') }}">
+                    <span class="level-num" style="background: #27ae60;">🛡️</span> WAF Detections
+                </a>
+            </li>
+            <li class="{% if request.endpoint == 'report.view_report' %}active{% endif %}">
+                <a href="{{ url_for('report.view_report') }}">
+                    <span class="level-num" style="background: #e67e22;">📊</span> Pentest Report
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ (completed_levels|length / 11) * 100 }}%"></div>
+            </div>
+            <p style="margin: 0; font-size: 0.85em; color: #bdc3c7;">Progress: {{ completed_levels|length }} / 11 Exploited</p>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content" style="flex-grow: 1; display: flex; flex-direction: column;">
+        
+        <!-- Live Sandbox Quick-Control Bar -->
+        <header class="sandbox-control-bar" style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-weight: bold; font-size: 0.9em; color: #2d3748;">⚡ Live Lab Mode:</span>
+                {% set ep = request.endpoint %}
+                {% set current_flag = 'sqli' %}
+                {% if ep in ['xss.comments', 'xss.search_reflected'] %}{% set current_flag = 'xss' %}
+                {% elif ep in ['csrf_module.profile'] %}{% set current_flag = 'csrf' %}
+                {% elif ep in ['upload_module.upload'] %}{% set current_flag = 'upload' %}
+                {% elif ep in ['dashboard', 'session_hijack.set_session'] %}{% set current_flag = 'session' %}
+                {% elif ep in ['file_inclusion.view_doc'] %}{% set current_flag = 'traversal' %}
+                {% elif ep in ['security_headers.security_headers_view'] %}{% set current_flag = 'headers' %}
+                {% elif ep in ['bruteforce.login_bruteforce'] %}{% set current_flag = 'bruteforce' %}
+                {% elif ep in ['recon.recon_workbench'] %}{% set current_flag = 'recon' %}
+                {% endif %}
+
+                {% set is_vuln = vuln_mode_dict.get(current_flag, True) %}
+                <span id="live-mode-badge" style="font-size: 0.8em; font-weight: bold; padding: 4px 10px; border-radius: 12px; background: {% if is_vuln %}#fde8e8; color: #c81e1e;{% else %}#def7ec; color: #03543f;{% endif %}">
+                    {{ current_flag|upper }}: {% if is_vuln %}VULNERABLE (Exploits Active){% else %}PATCHED (Secure Mode){% endif %}
+                </span>
+
+                <button onclick="toggleActiveModule('{{ current_flag }}')" style="background: #edf2f7; border: 1px solid #cbd5e0; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: bold; cursor: pointer; color: #4a5568;">
+                    ⇄ Switch to {% if is_vuln %}Patched{% else %}Vulnerable{% endif %}
+                </button>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button onclick="resetLabData()" style="background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 4px 12px; border-radius: 4px; font-size: 0.8em; font-weight: bold; cursor: pointer;">
+                    🔄 Reset Sandbox
+                </button>
+            </div>
+        </header>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages-global" style="margin: 15px 25px 0 25px;">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="content-wrapper" style="flex-grow: 1; padding: 25px;">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <script>
+        function toggleActiveModule(feature) {
+            fetch('/admin/toggle/' + feature, { method: 'POST' })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        window.location.reload();
+                    }
+                })
+                .catch(err => alert('Failed to toggle module: ' + err));
+        }
+
+        function resetLabData() {
+            if (confirm("Reset all database tables, uploaded files, and WAF detection logs to pristine state?")) {
+                fetch('/admin/reset_lab', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(res => {
+                        alert(res.message);
+                        window.location.reload();
+                    })
+                    .catch(err => alert('Error resetting lab: ' + err));
+            }
+        }
+    </script>
+</body>
+</html>

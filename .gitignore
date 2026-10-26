@@ -1,0 +1,35 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# SQLite databases & instance folder
+instance/
+*.db
+*.sqlite3
+
+# Runtime logs
+detections.log
+*.log
+
+# Uploaded test files (keep directory)
+static/uploads/*
+!static/uploads/.gitkeep
+safe_uploads/*
+!safe_uploads/.gitkeep
+
+# Temporary maintenance scripts
+fix.py
+refactor_templates.py
+reorder.py
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

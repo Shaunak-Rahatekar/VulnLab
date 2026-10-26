@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Penetration Testing Executive Report - VulnLab{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1050px; padding: 35px; background: white;">
+    
+    <!-- Report Header & Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2c3e50; padding-bottom: 20px; margin-bottom: 25px;">
+        <div>
+            <h1 style="margin: 0; color: #2c3e50; font-size: 2em;">Vulnerability Assessment & Pentest Report</h1>
+            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 1.05em;">
+                Target: <strong>VulnLab Sandbox Application (AY 2026-27)</strong> | Framework: <strong>OWASP Top 10 & PTES</strong>
+            </p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                🖨️ Export / Print PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Executive Summary Section -->
+    <section style="margin-bottom: 30px;">
+        <h3 style="color: #2c3e50; border-left: 4px solid #3498db; padding-left: 10px;">1. Executive Summary</h3>
+        <p style="line-height: 1.6; color: #444;">
+            During the comprehensive security assessment of the VulnLab environment, security analysts conducted black-box and grey-box penetration testing across authentication mechanisms, input handling, session state management, and file operations. 
+            A total of <strong>{{ total_findings }} vulnerability categories</strong> were identified across Units I through V of the security curriculum. 
+            Currently, <strong>{{ completed|length }} of {{ total_findings }}</strong> vulnerabilities have been actively exploited and verified within this active assessment session.
+        </p>
+    </section>
+
+    <!-- Risk Metrics Dashboard -->
+    <section style="margin-bottom: 30px;">
+        <h3 style="color: #2c3e50; border-left: 4px solid #e67e22; padding-left: 10px;">2. Risk Rating & CVSS Severity Overview</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px;">
+            <div style="background: #fdf2e9; border: 1px solid #f5cba7; border-radius: 6px; padding: 15px; text-align: center;">
+                <div style="font-size: 2em; font-weight: bold; color: #c0392b;">{{ crit_count }}</div>
+                <div style="font-weight: bold; color: #78281f;">Critical (CVSS 9.0+)</div>
+            </div>
+            <div style="background: #fef9e7; border: 1px solid #f9e79f; border-radius: 6px; padding: 15px; text-align: center;">
+                <div style="font-size: 2em; font-weight: bold; color: #d35400;">{{ high_count }}</div>
+                <div style="font-weight: bold; color: #7e5109;">High (CVSS 7.0 - 8.9)</div>
+            </div>
+            <div style="background: #ebf5fb; border: 1px solid #aed6f1; border-radius: 6px; padding: 15px; text-align: center;">
+                <div style="font-size: 2em; font-weight: bold; color: #2980b9;">{{ med_count }}</div>
+                <div style="font-weight: bold; color: #1b4f72;">Medium (CVSS 4.0 - 6.9)</div>
+            </div>
+            <div style="background: #eafaf1; border: 1px solid #a9dfbf; border-radius: 6px; padding: 15px; text-align: center;">
+                <div style="font-size: 2em; font-weight: bold; color: #27ae60;">{{ completed|length }}</div>
+                <div style="font-weight: bold; color: #145a32;">Exploits Verified</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Findings & Remediation Register -->
+    <section>
+        <h3 style="color: #2c3e50; border-left: 4px solid #e74c3c; padding-left: 10px; margin-bottom: 20px;">
+            3. Detailed Vulnerability Findings & Technical Remediation Register
+        </h3>
+
+        {% for v in vulnerabilities %}
+        <div style="border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            
+            <!-- Finding Title Bar -->
+            <div style="background: #f8f9fa; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                <div>
+                    <span style="font-family: monospace; font-weight: bold; color: #7f8c8d; margin-right: 8px;">#{{ v.id }}</span>
+                    <strong style="font-size: 1.1em; color: #2c3e50;">{{ v.title }}</strong>
+                    <span style="margin-left: 10px; font-size: 0.85em; background: #e8ecef; padding: 2px 8px; border-radius: 4px; color: #495057;">{{ v.unit }}</span>
+                </div>
+                <div>
+                    {% if v.severity == 'CRITICAL' %}
+                        <span style="background: #c0392b; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8em;">CRITICAL ({{ v.cvss }})</span>
+                    {% elif v.severity == 'HIGH' %}
+                        <span style="background: #d35400; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8em;">HIGH ({{ v.cvss }})</span>
+                    {% else %}
+                        <span style="background: #2980b9; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8em;">MEDIUM ({{ v.cvss }})</span>
+                    {% endif %}
+
+                    {% if v.id in completed %}
+                        <span style="background: #27ae60; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.8em; margin-left: 8px;">✓ EXPLOITED</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Finding Content Body -->
+            <div style="padding: 20px;">
+                <div style="margin-bottom: 12px; font-size: 0.9em; color: #555;">
+                    <strong>Endpoint:</strong> <code>{{ v.endpoint }}</code> | <strong>Vector:</strong> <code>{{ v.parameter }}</code> | <strong>OWASP:</strong> {{ v.owasp }}
+                </div>
+                
+                <div style="margin-bottom: 15px; font-size: 0.95em; line-height: 1.5; color: #333;">
+                    <strong>Description:</strong> {{ v.description }}
+                </div>
+
+                <div style="background: #f4f6f7; border-left: 3px solid #7f8c8d; padding: 10px 15px; margin-bottom: 15px; font-family: monospace; font-size: 0.85em; word-break: break-all;">
+                    <strong>Proof of Concept (PoC):</strong> {{ v.poc }}
+                </div>
+
+                <div style="background: #eafaf1; border-left: 3px solid #27ae60; padding: 12px 15px; font-size: 0.9em; line-height: 1.5; color: #1e8449;">
+                    <strong>Recommended Remediation:</strong> {{ v.remediation }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Sign-off Footer -->
+    <div style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; display: flex; justify-content: space-between; color: #7f8c8d; font-size: 0.9em;">
+        <div>Report Generated: <strong>AY 2026-27 Assessment Session</strong></div>
+        <div>Assessor: <strong>Ethical Hacking Student & Grader Review</strong></div>
+    </div>
+</div>
+{% endblock %}

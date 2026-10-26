@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from config import VULN_MODE
 from models import db, User, server_sessions
 
@@ -34,5 +34,6 @@ def change_email():
         user.email = new_email
         db.session.commit()
         # In a real app we'd flash a message here, but we redirect immediately
-        
+        current_app.config['COMPLETED_LEVELS'].add(5)
+
     return redirect(url_for('csrf_module.profile'))

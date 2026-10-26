@@ -1,7 +1,7 @@
 import os
 import uuid
 import magic
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_from_directory, current_app
 from werkzeug.utils import secure_filename
 from config import VULN_MODE
 from models import db, User, server_sessions
@@ -54,6 +54,7 @@ def upload():
         # 2. No robust extension checking (naive blacklist that can be bypassed)
         # 3. Saves directly to a publicly accessible static directory
         filename = file.filename
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
         
         # Naive blacklist approach (blocking exact exact .php or .exe, but allowing .py or .PHP)
         if filename.endswith('.php') or filename.endswith('.exe'):
@@ -66,6 +67,10 @@ def upload():
         user.profile_pic = filename
         db.session.commit()
         flash(f'File uploaded successfully to /static/uploads/{filename}', 'success')
+        
+        # Unlock Level 6
+        if ext not in ALLOWED_EXTENSIONS:
+             current_app.config['COMPLETED_LEVELS'].add(6)
         
     else:
         # PATCHED MODE:

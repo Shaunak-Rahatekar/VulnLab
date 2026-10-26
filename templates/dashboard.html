@@ -1,51 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - VulnLab</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        .dashboard-box {
-            background: #ffffff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-        .balance {
-            font-size: 2.5rem;
-            color: #28a745;
-            margin: 1rem 0;
-            font-weight: bold;
-        }
-        .activity-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .activity-list li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #eee;
-        }
-        .activity-list li:last-child {
-            border-bottom: none;
-        }
-        .date {
-            color: #888;
-            font-size: 0.85rem;
-            margin-right: 1rem;
-            display: inline-block;
-            width: 70px;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <div class="card" style="max-width: 800px;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 1rem;">
             <h2 style="margin: 0;">Welcome, {{ username }}!</h2>
@@ -99,5 +54,5 @@
         <p>Mode: <strong>{% if vuln_mode %}VULNERABLE{% else %}PATCHED{% endif %}</strong></p>
         <p><a href="/search">Go to Product Search</a> | <a href="/comments">Go to Guestbook</a></p>
     </footer>
-</body>
-</html>
+
+{% endblock %}

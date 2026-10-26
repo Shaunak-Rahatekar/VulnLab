@@ -1,0 +1,12 @@
+VulnLab Privacy Policy
+======================
+Last updated: Academic Year 2026-2027
+
+1. Introduction
+Welcome to VulnLab. We are committed to protecting the privacy of educational sandbox users.
+
+2. Information Collection
+This sandbox runs entirely locally on your machine and stores test data in a local SQLite database. No external telemetric data is collected or transmitted.
+
+3. Educational Purpose
+All mock data, credentials, and records provided herein are exclusively for security analysis, demonstration of OWASP vulnerabilities, and academic research.

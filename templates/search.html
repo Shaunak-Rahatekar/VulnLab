@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Search - VulnLab</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <div class="card" style="max-width: 800px;"> <!-- Made wider to accommodate data tables -->
         <h2>Product Search</h2>
         
@@ -67,5 +61,5 @@
         <p>Mode: <strong>{% if vuln_mode %}VULNERABLE{% else %}PATCHED{% endif %}</strong></p>
         <p><a href="/dashboard">Back to Dashboard</a></p>
     </footer>
-</body>
-</html>
+
+{% endblock %}

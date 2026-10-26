@@ -5,17 +5,21 @@ Welcome to the VulnLab Developer Documentation. This guide is designed for devel
 This project uses a centralized configuration file (`config.py`) containing a `VULN_MODE` dictionary. This allows you to selectively toggle individual vulnerability categories on or off. By toggling these flags (e.g., `"sqli": True`), you can immediately reproduce every vulnerable-vs-patched comparison yourself and verify the effectiveness of the implemented fixes.
 
 ## Table of Contents
-| Page | Vulnerability | OWASP Category | Toggle Flag |
-|------|---------------|----------------|-------------|
-| [Page 1: Login](#page-1-login--sql-injection-authentication-bypass) | SQL Injection (Auth Bypass) | A03:2021-Injection | `"sqli"` |
-| [Page 2: Product Search](#page-2-product-search--sql-injection-union-based-data-extraction) | SQL Injection (UNION) | A03:2021-Injection | `"sqli"` |
-| [Page 3: Comments](#page-3-comments--stored-cross-site-scripting-xss) | Stored XSS | A03:2021-Injection | `"xss"` |
-| [Page 4: Reflected Search](#page-4-reflected-search--reflected-xss) | Reflected XSS | A03:2021-Injection | `"xss"` |
-| [Page 5: Profile / Change Email](#page-5-profile--change-email--cross-site-request-forgery-csrf) | CSRF | A01:2021-Broken Access Control | `"csrf"` |
-| [Page 6: Upload Profile Picture](#page-6-upload-profile-picture--insecure-file-upload) | Insecure File Upload | A04:2021-Insecure Design | `"upload"` |
-| [Page 7: Dashboard](#page-7-dashboard--session-hijacking--session-fixation) | Session Hijacking & Fixation | A07:2021-Auth Failures | `"session"` |
-| [Page 8: Admin Detection Log](#page-8-admin-detection-log--blue-team-logging-layer) | N/A (WAF Defense Layer) | N/A | *Always On* |
-
+| Level / Page | Vulnerability / Topic | Syllabus Unit & OWASP Category | Toggle Flag |
+|---|---|---|---|
+| [Page 1: Login](#page-1-login--sql-injection-authentication-bypass) | SQL Injection (Auth Bypass) | Unit IV / A03:2021-Injection | `"sqli"` |
+| [Page 2: Product Search](#page-2-product-search--sql-injection-union-based-data-extraction) | SQL Injection (UNION) | Unit IV / A03:2021-Injection | `"sqli"` |
+| [Page 3: Comments](#page-3-comments--stored-cross-site-scripting-xss) | Stored XSS | Unit IV / A03:2021-Injection | `"xss"` |
+| [Page 4: Reflected Search](#page-4-reflected-search--reflected-xss) | Reflected XSS | Unit IV / A03:2021-Injection | `"xss"` |
+| [Page 5: Profile](#page-5-profile--change-email--cross-site-request-forgery-csrf) | CSRF | Unit IV / A01:2021-Broken Access Control | `"csrf"` |
+| [Page 6: File Upload](#page-6-upload-profile-picture--insecure-file-upload) | Insecure File Upload | Unit IV / A04:2021-Insecure Design | `"upload"` |
+| [Page 7: Dashboard](#page-7-dashboard--session-hijacking--session-fixation) | Session Hijacking & Fixation | Unit III / A07:2021-Auth Failures | `"session"` |
+| [Page 8: Document Viewer](#page-8-document-viewer--directory-traversal--local-file-inclusion-lfi) | Directory Traversal & LFI | Unit IV / A01:2021-Broken Access Control | `"traversal"` |
+| [Page 9: Security Headers](#page-9-http-security-headers--clickjacking-audit) | HTTP Security Headers & Clickjacking | Unit IV / A05:2021-Security Misconfiguration | `"headers"` |
+| [Page 10: Brute Force](#page-10-authentication-brute-force--rate-limiting) | Password Attacks & Rate Limiting | Unit III / A07:2021-Auth Failures | `"bruteforce"` |
+| [Page 11: Reconnaissance](#page-11-footprinting-reconnaissance--information-disclosure) | Information Disclosure & OSINT | Unit II / Reconnaissance & Scanning | `"recon"` |
+| [Page 12: WAF & IPS Dashboard](#page-12-admin-detection-log--waf--ips-defense-layer) | WAF / IDS / IPS Layer | Unit III / Network Security Controls | `"waf_mode"` |
+| [Page 13: Pentest Report](#page-13-automated-penetration-testing-executive-report) | Pentest Reporting & Risk Rating | Unit V / Penetration Testing & Defense | *Dynamic* |
 
 ---
 
@@ -368,7 +372,7 @@ The patched version resolves both vulnerabilities simultaneously by implementing
 
 ---
 
-## Page 8: Admin Detection Log — Blue-Team Logging Layer
+## Page 12: Admin Detection Log — WAF / IPS Defense Layer
 
 ### Page Structure
 - **Route Path:** `/admin/detections`
@@ -402,3 +406,149 @@ Real-world, enterprise-grade Web Application Firewalls require much more than na
 ### How to Toggle
 - **Config Flag:** N/A 
 - The detection middleware is always active globally. It intentionally operates in a "passive" mode—meaning it observes, flags, and logs the attack but does *not* block the HTTP request or drop the connection. This ensures that the vulnerable endpoints in the sandbox still successfully fire so you can verify the exploit works, while proving the defense layer saw it happen.
+
+---
+
+## Page 8: Document Viewer — Directory Traversal & Local File Inclusion (LFI)
+
+### Page Structure
+- **Route Path:** `/view_doc`
+- **Template File:** `templates/view_doc.html`
+- **Form Fields:** `file` (GET query parameter)
+- **Backend File/Function Involved:** `modules/file_inclusion.py` -> `view_doc()`
+
+### Vulnerability Type & OWASP Category
+Directory Traversal & Local File Inclusion — **Unit IV / A01:2021-Broken Access Control**
+
+### Root Cause
+The application accepts user-controlled file path inputs directly from the query string and concatenates them with the document folder without path canonicalization:
+```python
+target_path = os.path.join(DOCS_DIR, filename)
+with open(target_path, 'r') as f:
+    file_content = f.read()
+```
+Because relative path sequences (`../`) are not stripped, an attacker can climb out of `docs/` and access arbitrary files on the system.
+
+### Exploitation Steps
+1. Navigate to `/view_doc`.
+2. In the file input form or URL, supply the traversal payload:
+   `http://127.0.0.1:5000/view_doc?file=../../config.py`
+3. Click **Fetch Document**.
+4. The server displays the contents of `config.py`, revealing internal secrets and configuration toggles.
+5. Automated exploitation script:
+   `python attacks/traversal_attack.py`
+
+### Impact
+- **Severity:** High (CVSS 7.5)
+- **Gain:** Unauthorized reading of application source code, configuration files, and system secrets.
+
+### Fix Applied
+1. Normalize and bind paths using `werkzeug.utils.safe_join(DOCS_DIR, filename)`.
+2. Enforce a strict whitelist of permitted files (`ALLOWED_DOCS`).
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["traversal"]`
+- In-Browser: Use the quick control switch on the top bar of `/view_doc`.
+
+---
+
+## Page 9: HTTP Security Headers & Clickjacking Audit
+
+### Page Structure
+- **Route Path:** `/security_headers`
+- **Template File:** `templates/security_headers.html`
+- **Backend File/Function Involved:** `modules/security_headers.py`, `app.py` (`apply_security_headers`)
+
+### Vulnerability Type & OWASP Category
+Security Misconfiguration — **Unit IV / A05:2021-Security Misconfiguration**
+
+### Root Cause
+Missing defense-in-depth HTTP response headers (`X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`, `Strict-Transport-Security`). Without `X-Frame-Options`, third-party domains can frame the application inside hidden `<iframe>` tags, enabling Clickjacking (UI Redressing) attacks.
+
+### Exploitation Steps
+1. Navigate to `/security_headers`.
+2. Inspect the live security headers audit checklist.
+3. Observe the embedded Clickjacking simulation box attempting to frame the `/profile` page.
+4. When vulnerable, the profile is framed without restriction; when patched, the browser refuses to embed the frame.
+
+### Fix Applied
+Global middleware in `app.py` enforces baseline hardening headers:
+- `Content-Security-Policy: default-src 'self' ...`
+- `X-Frame-Options: SAMEORIGIN`
+- `X-Content-Type-Options: nosniff`
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["headers"]`
+
+---
+
+## Page 10: Authentication Brute-Force & Rate Limiting
+
+### Page Structure
+- **Route Path:** `/login_bruteforce`
+- **Template File:** `templates/login_bruteforce.html`
+- **Form Fields:** `username`, `password`
+- **Backend File/Function Involved:** `modules/bruteforce.py`
+
+### Vulnerability Type & OWASP Category
+Identification and Authentication Failures — **Unit III / A07:2021-Auth Failures**
+
+### Root Cause
+The authentication route lacks rate-limiting thresholds, progressive delays, and account lockout controls. Attackers can automate dictionary or credential stuffing attacks without restriction.
+
+### Exploitation Steps
+1. Navigate to `/login_bruteforce`.
+2. Run the automated dictionary attack script:
+   `python attacks/bruteforce_attack.py`
+3. In vulnerable mode, the script rapidly iterates through passwords and successfully cracks account `johndoe` with `password123`.
+4. In patched mode, after 5 failed attempts, the server issues an HTTP 429 lockout.
+
+### Fix Applied
+1. IP/Username attempt tracking within a 60-second sliding window.
+2. Mandatory lockout after 5 consecutive failed attempts.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["bruteforce"]`
+
+---
+
+## Page 11: Footprinting, Reconnaissance & Information Disclosure
+
+### Page Structure
+- **Route Path:** `/recon`, `/robots.txt`, `/config.py.bak`, `/admin/secret_backup`
+- **Template File:** `templates/recon.html`, `templates/secret_backup.html`
+- **Backend File/Function Involved:** `modules/recon.py`
+
+### Vulnerability Type & OWASP Category
+Information Disclosure — **Unit II: Reconnaissance & Scanning**
+
+### Root Cause
+Publicly accessible `robots.txt` leaks administrative paths; sensitive backup files (`.bak`) remain in the public web root; verbose server headers advertise backend technologies.
+
+### Exploitation Steps
+1. Navigate to `/robots.txt` to discover leaked administrative paths.
+2. Navigate to `/config.py.bak` to inspect cleartext backup configuration secrets.
+3. Access `/admin/secret_backup` to access unlinked administrative consoles.
+4. Execute `curl -I http://127.0.0.1:5000/` to grab server technology banners.
+
+### Fix Applied
+1. Sanitize `robots.txt` to avoid advertising internal directory structures.
+2. Web server rule blocking `.bak`, `.old`, and `.git` extensions.
+3. Suppress verbose `Server` response headers.
+
+### How to Toggle
+- **Config Flag:** `config.VULN_MODE["recon"]`
+
+---
+
+## Page 13: Automated Penetration Testing Executive Report
+
+### Page Structure
+- **Route Path:** `/report`
+- **Template File:** `templates/report.html`
+- **Backend File/Function Involved:** `modules/report.py`
+
+### Feature Overview
+Directly aligns with **Unit V (Penetration Testing Framework, Report Writing, Executive Summary, Risk Rating, Remediation)**. Dynamically evaluates all 11 vulnerability modules, calculates CVSS v3.1 severity metrics, tracks verified exploit completion status, and provides technical proof of concepts and code remediations. Features an instant PDF export button (`window.print()`).
+

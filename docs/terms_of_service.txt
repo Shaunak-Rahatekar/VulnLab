@@ -1,0 +1,5 @@
+VulnLab Terms of Service
+==========================
+By using this application, you agree to follow the ethical hacking code of conduct.
+Unauthorized penetration testing against systems without explicit prior permission is illegal under Cyber Laws and IT Acts.
+Ensure all testing remains strictly within this isolated sandbox environment.

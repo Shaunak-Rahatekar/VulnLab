@@ -39,19 +39,6 @@
         </div>
     </div>
 
-    <!-- Hint and Solution Toggles -->
-    <div class="info-panel" style="max-width: 600px; margin: 2rem auto;">
-        <details class="hint-box">
-            <summary>Hint: What's the vulnerability?</summary>
-            <p>This form is meant to accept image files (like <code>.jpg</code> or <code>.png</code>) for a profile picture. But what happens if you try to upload an executable script (like a Python <code>.py</code> file or an HTML payload) instead? Does the server securely validate the file extension or its contents before saving it to the disk?</p>
-        </details>
-
-        <details class="solution-box">
-            <summary>Solution: How to exploit it</summary>
-            <p><strong>Vulnerability:</strong> Insecure File Upload</p>
-            <p><strong>Exploitation:</strong> In Vulnerable mode, the backend saves any file you upload directly to an accessible <code>uploads/</code> directory without checking the extension. An attacker could upload a malicious script (e.g., <code>shell.py</code>) or a defacement page (e.g., <code>hacked.html</code>) and then navigate directly to its URL (like <code>/uploads/shell.py</code>) to execute arbitrary code or hijack the web application, leading to a complete server compromise.</p>
-        </details>
-    </div>
 
     <footer>
         <p>VulnLab — Educational Security Sandbox.</p>

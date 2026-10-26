@@ -27,27 +27,6 @@
         </div>
     </div>
 
-    <!-- Hint and Solution Toggles -->
-    <div class="info-panel" style="max-width: 800px;">
-        <details class="hint-box">
-            <summary>Hint: What's the vulnerability?</summary>
-            <p>How does the server know you are logged in right now? Check your browser's developer tools (Application > Cookies). If an attacker steals that exact cookie value using the Stored XSS payload from Page 3, what happens if they inject it into their own browser?</p>
-        </details>
-
-        <details class="solution-box">
-            <summary>Solution: How to exploit it</summary>
-            <p><strong>Vulnerability:</strong> Session Hijacking (via XSS) and Session Fixation</p>
-            <p><strong>Exploitation:</strong></p>
-            <ol>
-                <li>Drop the payload <code>&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code> in the Guestbook (Page 3).</li>
-                <li>Copy the session cookie value that pops up.</li>
-                <li>Open a new browser (like Incognito mode) where you are NOT logged in.</li>
-                <li>Open DevTools, manually set the <code>session</code> cookie to the stolen value.</li>
-                <li>Navigate to <code>/dashboard</code>. You are now logged in as the victim without knowing their password!</li>
-            </ol>
-            <p>In <strong>Vulnerable</strong> mode, the session cookie lacks the <code>HttpOnly</code> flag (allowing JS to read it). In <strong>Patched</strong> mode, the <code>HttpOnly</code> flag is set to true, making <code>document.cookie</code> return nothing for that cookie, thereby blocking XSS-based hijacking entirely.</p>
-        </details>
-    </div>
 
     <footer>
         <p>VulnLab — Educational Security Sandbox.</p>

@@ -41,20 +41,6 @@
         {% endif %}
     </div>
 
-    <!-- Hint and Solution Toggles (As requested, added to this page) -->
-    <div class="info-panel" style="max-width: 800px;">
-        <details class="hint-box">
-            <summary>Hint: What's the vulnerability?</summary>
-            <p>This search feature is vulnerable to a <strong>UNION-based SQL Injection</strong>. By injecting a UNION SELECT statement into the search query, you can trick the database into returning data from other tables (like the <code>users</code> table) right alongside the normal product results.</p>
-        </details>
-
-        <details class="solution-box">
-            <summary>Solution: How to exploit it</summary>
-            <p><strong>Goal:</strong> Extract user credentials.</p>
-            <p><strong>Payload:</strong> <code>' UNION SELECT id, username, password FROM users -- </code></p>
-            <p>The backend expects the query to return 3 columns (e.g. id, name, description). By injecting the payload above, we close the original string and force the database to append the id, username, and plain password from the users table into this very same table structure.</p>
-        </details>
-    </div>
 
     <footer>
         <p>VulnLab — Educational Security Sandbox.</p>

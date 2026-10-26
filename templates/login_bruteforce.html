@@ -55,20 +55,6 @@
     </form>
 </div>
 
-<!-- Hints and Solution Accordion -->
-<div class="info-panel" style="max-width: 800px; margin-top: 1.5rem;">
-    <details class="hint-box">
-        <summary>Hint: How to test brute-forcing?</summary>
-        <p>In <strong>Vulnerable Mode</strong>, you can send unlimited incorrect password attempts without facing throttling, delays, or lockout. Try running the automated cracking script: <code>python attacks/bruteforce_attack.py</code></p>
-    </details>
-
-    <details class="solution-box">
-        <summary>Solution: Credential Info & Remediation</summary>
-        <p><strong>Target Account:</strong> <code>johndoe</code></p>
-        <p><strong>Actual Password:</strong> <code>password123</code></p>
-        <p><strong>Remediation:</strong> Implement progressive back-off delays, account lockouts after 5 failed attempts, IP rate limiting, and multi-factor authentication (MFA).</p>
-    </details>
-</div>
 
 <footer>
     <p>VulnLab — Educational Security Sandbox.</p>

@@ -57,25 +57,6 @@
     {% endif %}
 </div>
 
-<!-- Hints and Solution Accordion -->
-<div class="info-panel" style="max-width: 900px; margin-top: 1.5rem;">
-    <details class="hint-box">
-        <summary>Hint: What is Directory Traversal?</summary>
-        <p>The backend application takes the <code>?file=...</code> URL parameter and passes it directly to the filesystem loader. Can you step out of the current <code>docs/</code> directory using relative path dots (<code>../</code>) to access sensitive files in the application root?</p>
-    </details>
-
-    <details class="solution-box">
-        <summary>Solution: How to exploit & payload</summary>
-        <p><strong>Vulnerability:</strong> Local File Inclusion & Path Traversal (CWE-22)</p>
-        <p><strong>Exploit Payloads to Try:</strong></p>
-        <ul>
-            <li><code>../config.py</code> — Leaks application configuration and toggles!</li>
-            <li><code>../app.py</code> — Extracts application source code and secret keys!</li>
-            <li><code>../detections.log</code> — Leaks administrative detection logs!</li>
-        </ul>
-        <p><strong>Remediation:</strong> Use <code>werkzeug.utils.safe_join()</code> and restrict inputs strictly to an allowed whitelist of filenames.</p>
-    </details>
-</div>
 
 <footer>
     <p>VulnLab — Educational Security Sandbox.</p>

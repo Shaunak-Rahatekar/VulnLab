@@ -31,20 +31,6 @@
         {% endif %}
     </div>
 
-    <!-- Hint and Solution Toggles -->
-    <div class="info-panel" style="max-width: 800px;">
-        <details class="hint-box">
-            <summary>Hint: What's the vulnerability?</summary>
-            <p>Notice how the exact search term you submit in the URL (the <code>?query=...</code> parameter) is instantly echoed back onto the page in the heading. What happens if that search term isn't just text, but instead contains an HTML tag or a JavaScript payload?</p>
-        </details>
-
-        <details class="solution-box">
-            <summary>Solution: How to exploit it</summary>
-            <p><strong>Vulnerability:</strong> Reflected Cross-Site Scripting (XSS)</p>
-            <p><strong>Payload:</strong> <code>&lt;img src="x" onerror="alert('Reflected XSS!')"&gt;</code></p>
-            <p>Unlike Stored XSS, this payload is not saved in the backend database. Instead, it is "reflected" directly off the web server back into the DOM. An attacker would craft a malicious URL containing this payload and send it to a victim. When the victim clicks the link, their browser executes the script.</p>
-        </details>
-    </div>
 
     <footer>
         <p>VulnLab — Educational Security Sandbox.</p>

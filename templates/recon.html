@@ -71,28 +71,6 @@
     </div>
 </div>
 
-<!-- Hints and Solution Accordion -->
-<div class="info-panel" style="max-width: 900px; margin-top: 1.5rem;">
-    <details class="hint-box">
-        <summary>Hint: Google Dorking queries for information gathering</summary>
-        <p>Attackers use advanced search engine queries (Google Dorks) to passively identify leaked assets:</p>
-        <ul>
-            <li><code>site:target.com filetype:bak</code></li>
-            <li><code>site:target.com inurl:robots.txt</code></li>
-            <li><code>site:target.com "DB_PASSWORD"</code></li>
-        </ul>
-    </details>
-
-    <details class="solution-box">
-        <summary>Solution: Remediation against Reconnaissance</summary>
-        <p><strong>Remediation:</strong></p>
-        <ul>
-            <li>Never place sensitive or administrative pathnames in public <code>robots.txt</code> files.</li>
-            <li>Configure web server rules to deny requests for sensitive file extensions (<code>.bak</code>, <code>.git</code>, <code>.env</code>).</li>
-            <li>Suppress verbose <code>Server</code> and technology signature headers in HTTP responses.</li>
-        </ul>
-    </details>
-</div>
 
 <footer>
     <p>VulnLab — Educational Security Sandbox.</p>

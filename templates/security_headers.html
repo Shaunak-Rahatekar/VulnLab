@@ -12,12 +12,12 @@
     </div>
 
     <div style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🟠 Integrity & Confidentiality</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A05:2021-Security Misconfiguration</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 6.5 (Medium)</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🟠 Integrity & Confidentiality</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A05:2021-Security Misconfiguration</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 6.5 (Medium)</span>
     </div>
 
-    <p style="color: #666; margin-bottom: 1.5rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
         Security headers provide critical client-side browser hardening. When headers like <code>X-Frame-Options</code> or <code>Content-Security-Policy</code> are missing, applications become vulnerable to UI Redressing (Clickjacking) and script injection.
     </p>
 
@@ -34,30 +34,30 @@
         <tbody>
             {% for h in header_status %}
             <tr>
-                <td style="font-family: monospace; font-weight: bold; color: #2c3e50;">{{ h.name }}</td>
+                <td style="font-family: monospace; font-weight: bold; color: var(--cyan);">{{ h.name }}</td>
                 <td>
                     {% if h.present %}
-                        <span style="color: #27ae60; font-weight: bold; background: #eafaf1; padding: 4px 8px; border-radius: 4px;">
+                        <span style="color: #27ae60; font-weight: bold; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 8px; border-radius: 4px;">
                             ✓ {{ h.status }}
                         </span>
                     {% else %}
-                        <span style="color: #c0392b; font-weight: bold; background: #fdebd0; padding: 4px 8px; border-radius: 4px;">
+                        <span style="color: #c0392b; font-weight: bold; background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); padding: 4px 8px; border-radius: 4px;">
                             ✗ {{ h.status }}
                         </span>
                     {% endif %}
                 </td>
-                <td style="font-family: monospace; font-size: 0.85em; color: #555;">{{ h.recommended }}</td>
-                <td style="font-size: 0.85em; color: #666;">{{ h.description }}</td>
+                <td style="font-family: monospace; font-size: 0.85em; color: var(--text-muted);">{{ h.recommended }}</td>
+                <td style="font-size: 0.85em; color: var(--text-muted);">{{ h.description }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border-subtle);">
 
     <!-- Clickjacking Simulation -->
     <h3>Interactive Clickjacking Demonstration (UI Redressing)</h3>
-    <p style="color: #666; font-size: 0.9em;">
+    <p style="color: var(--text-muted); font-size: 0.9em;">
         Below is a simulated third-party attacker website embedding the VulnLab profile page inside an <code>&lt;iframe&gt;</code>. 
         In <strong>Vulnerable Mode</strong> (missing <code>X-Frame-Options</code>), the browser allows framing. In <strong>Patched Mode</strong>, the browser blocks the frame.
     </p>

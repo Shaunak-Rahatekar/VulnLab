@@ -12,12 +12,12 @@
     </div>
 
     <div style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🔴 Confidentiality</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A05:2021-Security Misconfiguration</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 5.3 (Medium)</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🔴 Confidentiality</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A05:2021-Security Misconfiguration</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 5.3 (Medium)</span>
     </div>
 
-    <p style="color: #666; margin-bottom: 1.5rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
         Before launching an exploit, penetration testers perform <strong>Passive and Active Reconnaissance</strong> to discover hidden endpoints, technology stacks, and exposed backup files.
     </p>
 
@@ -25,9 +25,9 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 2rem;">
         
         <!-- Target 1: Robots.txt -->
-        <div style="border: 1px solid #ddd; border-radius: 6px; padding: 16px; background: #fdfefe;">
-            <h4 style="margin-top: 0; color: #2c3e50;">1. Robots.txt Analysis</h4>
-            <p style="font-size: 0.9em; color: #666;">
+        <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 16px; background: var(--bg-surface);">
+            <h4 style="margin-top: 0; color: var(--text-main);">1. Robots.txt Analysis</h4>
+            <p style="font-size: 0.9em; color: var(--text-muted);">
                 Web crawlers parse <code>/robots.txt</code> to know which paths to ignore. Attackers inspect it to find hidden directories.
             </p>
             <a href="/robots.txt" target="_blank" class="btn" style="text-decoration: none; padding: 6px 12px; font-size: 0.85em; background: #34495e; color: white; border-radius: 4px; display: inline-block;">
@@ -36,9 +36,9 @@
         </div>
 
         <!-- Target 2: Exposed Backups -->
-        <div style="border: 1px solid #ddd; border-radius: 6px; padding: 16px; background: #fdfefe;">
-            <h4 style="margin-top: 0; color: #2c3e50;">2. Sensitive Backup Files</h4>
-            <p style="font-size: 0.9em; color: #666;">
+        <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 16px; background: var(--bg-surface);">
+            <h4 style="margin-top: 0; color: var(--text-main);">2. Sensitive Backup Files</h4>
+            <p style="font-size: 0.9em; color: var(--text-muted);">
                 Developers frequently leave temporary <code>.bak</code>, <code>.old</code>, or <code>.env</code> files accessible over HTTP.
             </p>
             <a href="/config.py.bak" target="_blank" class="btn" style="text-decoration: none; padding: 6px 12px; font-size: 0.85em; background: #e67e22; color: white; border-radius: 4px; display: inline-block;">
@@ -47,9 +47,9 @@
         </div>
 
         <!-- Target 3: Hidden Admin Endpoint -->
-        <div style="border: 1px solid #ddd; border-radius: 6px; padding: 16px; background: #fdfefe;">
-            <h4 style="margin-top: 0; color: #2c3e50;">3. Discovered Hidden Route</h4>
-            <p style="font-size: 0.9em; color: #666;">
+        <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 16px; background: var(--bg-surface);">
+            <h4 style="margin-top: 0; color: var(--text-main);">3. Discovered Hidden Route</h4>
+            <p style="font-size: 0.9em; color: var(--text-muted);">
                 Paths leaked in <code>robots.txt</code> can lead directly to unprotected administration panels.
             </p>
             <a href="/admin/secret_backup" target="_blank" class="btn" style="text-decoration: none; padding: 6px 12px; font-size: 0.85em; background: #c0392b; color: white; border-radius: 4px; display: inline-block;">
@@ -58,9 +58,9 @@
         </div>
 
         <!-- Target 4: Banner Grabbing -->
-        <div style="border: 1px solid #ddd; border-radius: 6px; padding: 16px; background: #fdfefe;">
-            <h4 style="margin-top: 0; color: #2c3e50;">4. Server Banner Grabbing</h4>
-            <p style="font-size: 0.9em; color: #666;">
+        <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 16px; background: var(--bg-surface);">
+            <h4 style="margin-top: 0; color: var(--text-main);">4. Server Banner Grabbing</h4>
+            <p style="font-size: 0.9em; color: var(--text-muted);">
                 Attackers send <code>curl -I</code> or use <code>nmap -sV</code> to extract verbose server version information from HTTP response headers.
             </p>
             <div style="font-family: monospace; font-size: 0.8em; background: #2c3e50; color: #2ecc71; padding: 8px; border-radius: 4px;">

@@ -12,17 +12,17 @@
     </div>
 
     <div style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🔴 Confidentiality & Integrity</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A07:2021-Identification & Auth Failures</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 7.5 (High)</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🔴 Confidentiality & Integrity</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A07:2021-Identification & Auth Failures</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 7.5 (High)</span>
     </div>
 
-    <p style="color: #666; margin-bottom: 1.5rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
         Demonstrates the vulnerability of authentication endpoints to automated credential guessing when rate limiting, lockout thresholds, and CAPTCHAs are omitted.
     </p>
 
     <!-- Attempt Counter Badge -->
-    <div style="background: {% if locked %}#fde8e8{% else %}#f8f9fa{% endif %}; border: 1px solid {% if locked %}#f8b4b4{% else %}#e9ecef{% endif %}; padding: 12px 16px; border-radius: 6px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+    <div style="background: {% if locked %}rgba(244, 63, 94, 0.15){% else %}var(--bg-surface){% endif %}; border: 1px solid {% if locked %}var(--rose){% else %}var(--border-subtle){% endif %}; color: var(--text-main); padding: 12px 16px; border-radius: 6px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
         <div>
             <strong>Recent Failed Attempts (Current Window):</strong> 
             <span style="font-family: monospace; font-size: 1.1em; color: {% if attempts_count > 3 %}#c0392b{% else %}#2980b9{% endif %}; font-weight: bold;">

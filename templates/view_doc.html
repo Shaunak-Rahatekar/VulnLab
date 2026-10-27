@@ -12,12 +12,12 @@
     </div>
 
     <div style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🔴 Confidentiality</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A01:2021-Broken Access Control</span>
-        <span style="font-size: 0.85em; background: #eee; padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 7.5 (High)</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CIA Impact:</strong> 🔴 Confidentiality</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>OWASP:</strong> A01:2021-Broken Access Control</span>
+        <span style="font-size: 0.85em; background: rgba(255, 255, 255, 0.08); color: var(--text-muted); border: 1px solid var(--border-subtle); padding: 4px 8px; border-radius: 4px;"><strong>CVSS:</strong> 7.5 (High)</span>
     </div>
 
-    <p style="color: #666; margin-bottom: 1.5rem;">
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
         Select an authorized document to view, or specify a custom filename parameter in the request query.
     </p>
 
@@ -26,7 +26,7 @@
         {% for doc_file, doc_name in allowed_docs.items() %}
             <a href="{{ url_for('file_inclusion.view_doc', file=doc_file) }}" 
                class="btn" 
-               style="text-decoration: none; padding: 8px 16px; border-radius: 4px; background: {% if current_file == doc_file %}#3498db{% else %}#ecf0f1{% endif %}; color: {% if current_file == doc_file %}white{% else %}#2c3e50{% endif %}; font-weight: bold; font-size: 0.9em;">
+               style="text-decoration: none; padding: 8px 16px; border-radius: 4px; background: {% if current_file == doc_file %}var(--cyan){% else %}var(--bg-surface){% endif %}; color: {% if current_file == doc_file %}#070a13{% else %}var(--text-main){% endif %}; border: 1px solid var(--border-subtle); font-weight: bold; font-size: 0.9em;">
                📄 {{ doc_name }}
             </a>
         {% endfor %}

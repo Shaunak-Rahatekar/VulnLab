@@ -2,9 +2,8 @@ import os
 import re
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.lib.units import inch
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
@@ -22,27 +21,51 @@ class NumberedCanvas(canvas.Canvas):
         num_pages = len(self._saved_page_states)
         for state in self._saved_page_states:
             self.__dict__.update(state)
-            self.draw_page_number(num_pages)
+            self.draw_page_decorations(num_pages)
             canvas.Canvas.showPage(self)
         canvas.Canvas.save(self)
 
-    def draw_page_number(self, page_count):
+    def draw_page_decorations(self, page_count):
+        # Determine theme from canvas attribute if set, default to light
+        is_dark = getattr(self, 'is_dark_theme', False)
+
         if self._pageNumber > 1:
             self.saveState()
             self.setFont("Helvetica", 9)
-            self.setFillColor(colors.HexColor("#64748b"))
-            self.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
-            page_text = f"Page {self._pageNumber} of {page_count}"
-            self.drawRightString(letter[0] - 54, 36, page_text)
-            self.setStrokeColor(colors.HexColor("#cbd5e1"))
+            if is_dark:
+                self.setFillColor(colors.HexColor("#94a3b8"))
+                self.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
+                self.drawRightString(letter[0] - 54, 36, f"Page {self._pageNumber} of {page_count}")
+                self.setStrokeColor(colors.HexColor("#334155"))
+            else:
+                self.setFillColor(colors.HexColor("#64748b"))
+                self.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
+                self.drawRightString(letter[0] - 54, 36, f"Page {self._pageNumber} of {page_count}")
+                self.setStrokeColor(colors.HexColor("#cbd5e1"))
             self.setLineWidth(0.5)
             self.line(54, 48, letter[0] - 54, 48)
             self.restoreState()
 
-def build_pdf():
-    pdf_path = "VulnLab_Project_Report.pdf"
+
+def draw_light_background(canv, doc):
+    canv.saveState()
+    # Explicit solid white background rectangle covering the entire page
+    canv.setFillColor(colors.white)
+    canv.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
+    canv.restoreState()
+
+
+def draw_dark_background(canv, doc):
+    canv.saveState()
+    # Dark cyberpunk navy background covering the entire page
+    canv.setFillColor(colors.HexColor("#0b0f19"))
+    canv.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
+    canv.restoreState()
+
+
+def build_pdf(filename="VulnLab_Project_Report.pdf", dark_mode=False):
     doc = SimpleDocTemplate(
-        pdf_path,
+        filename,
         pagesize=letter,
         leftMargin=54,
         rightMargin=54,
@@ -52,15 +75,45 @@ def build_pdf():
 
     styles = getSampleStyleSheet()
 
-    # Custom styles
+    # Color palette definition based on theme
+    if dark_mode:
+        c_title = colors.HexColor("#38bdf8")
+        c_subtitle = colors.HexColor("#06b6d4")
+        c_meta = colors.HexColor("#cbd5e1")
+        c_team = colors.HexColor("#f1f5f9")
+        c_h1 = colors.HexColor("#38bdf8")
+        c_h2 = colors.HexColor("#22d3ee")
+        c_body = colors.HexColor("#e2e8f0")
+        c_table_hdr_bg = colors.HexColor("#0284c7")
+        c_table_hdr_text = colors.white
+        c_table_row1 = colors.HexColor("#0f172a")
+        c_table_row2 = colors.HexColor("#1e293b")
+        c_table_text = colors.HexColor("#f1f5f9")
+        c_grid = colors.HexColor("#334155")
+    else:
+        c_title = colors.HexColor("#0f172a")
+        c_subtitle = colors.HexColor("#0284c7")
+        c_meta = colors.HexColor("#334155")
+        c_team = colors.HexColor("#1e293b")
+        c_h1 = colors.HexColor("#0f172a")
+        c_h2 = colors.HexColor("#0369a1")
+        c_body = colors.HexColor("#334155")
+        c_table_hdr_bg = colors.HexColor("#0284c7")
+        c_table_hdr_text = colors.white
+        c_table_row1 = colors.white
+        c_table_row2 = colors.HexColor("#f8fafc")
+        c_table_text = colors.HexColor("#1e293b")
+        c_grid = colors.HexColor("#cbd5e1")
+
+    # Typography styles
     title_style = ParagraphStyle(
         'CoverTitle',
         parent=styles['Normal'],
         fontName='Helvetica-Bold',
         fontSize=28,
         leading=34,
-        alignment=1, # Center
-        textColor=colors.HexColor("#0f172a")
+        alignment=1,
+        textColor=c_title
     )
 
     subtitle_style = ParagraphStyle(
@@ -70,7 +123,7 @@ def build_pdf():
         fontSize=14,
         leading=20,
         alignment=1,
-        textColor=colors.HexColor("#0284c7")
+        textColor=c_subtitle
     )
 
     cover_meta = ParagraphStyle(
@@ -80,7 +133,7 @@ def build_pdf():
         fontSize=11,
         leading=16,
         alignment=1,
-        textColor=colors.HexColor("#334155")
+        textColor=c_meta
     )
 
     cover_team = ParagraphStyle(
@@ -90,7 +143,7 @@ def build_pdf():
         fontSize=11,
         leading=16,
         alignment=1,
-        textColor=colors.HexColor("#1e293b")
+        textColor=c_team
     )
 
     h1_style = ParagraphStyle(
@@ -99,7 +152,7 @@ def build_pdf():
         fontName='Helvetica-Bold',
         fontSize=15,
         leading=19,
-        textColor=colors.HexColor("#0f172a"),
+        textColor=c_h1,
         spaceBefore=14,
         spaceAfter=6,
         keepWithNext=True
@@ -111,7 +164,7 @@ def build_pdf():
         fontName='Helvetica-Bold',
         fontSize=12,
         leading=16,
-        textColor=colors.HexColor("#0369a1"),
+        textColor=c_h2,
         spaceBefore=10,
         spaceAfter=4,
         keepWithNext=True
@@ -123,7 +176,7 @@ def build_pdf():
         fontName='Helvetica',
         fontSize=10,
         leading=14.5,
-        textColor=colors.HexColor("#334155"),
+        textColor=c_body,
         spaceAfter=6
     )
 
@@ -141,7 +194,7 @@ def build_pdf():
         fontName='Helvetica-Bold',
         fontSize=9,
         leading=12,
-        textColor=colors.white
+        textColor=c_table_hdr_text
     )
 
     table_body = ParagraphStyle(
@@ -150,19 +203,7 @@ def build_pdf():
         fontName='Helvetica',
         fontSize=8.5,
         leading=11.5,
-        textColor=colors.HexColor("#1e293b")
-    )
-
-    code_style = ParagraphStyle(
-        'CodeStyle',
-        parent=styles['Normal'],
-        fontName='Courier',
-        fontSize=8.5,
-        leading=11,
-        textColor=colors.HexColor("#0f172a"),
-        backColor=colors.HexColor("#f1f5f9"),
-        borderPadding=4,
-        spaceAfter=6
+        textColor=c_table_text
     )
 
     story = []
@@ -198,7 +239,7 @@ def build_pdf():
     story.append(Paragraph(
         "A central feature is its dual-state design: users can switch at runtime between a deliberately vulnerable mode and "
         "a patched mode. This lets learners observe an attack in a controlled environment, inspect the corresponding code, "
-        "and compare it with a defensive implementation. The platform also describes a custom Web Application Firewall (WAF) "
+        "and compare it with a defensive implementation. The platform also features a custom Web Application Firewall (WAF) "
         "with passive alerting and active blocking modes, automated Python exploit scripts, CVSS-oriented risk scoring, "
         "and an HTML penetration-test report.", body_style
     ))
@@ -271,15 +312,15 @@ def build_pdf():
     ]
     t = Table(tech_data, colWidths=[150, 354])
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#0284c7")),
+        ('BACKGROUND', (0,0), (-1,0), c_table_hdr_bg),
         ('ALIGN', (0,0), (-1,-1), 'LEFT'),
         ('VALIGN', (0,0), (-1,-1), 'TOP'),
         ('BOTTOMPADDING', (0,0), (-1,-1), 4),
         ('TOPPADDING', (0,0), (-1,-1), 4),
         ('LEFTPADDING', (0,0), (-1,-1), 6),
         ('RIGHTPADDING', (0,0), (-1,-1), 6),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor("#f8fafc")])
+        ('GRID', (0,0), (-1,-1), 0.5, c_grid),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [c_table_row1, c_table_row2])
     ]))
     story.append(t)
     story.append(Spacer(1, 10))
@@ -362,15 +403,15 @@ def build_pdf():
     ]
     mt = Table(matrix_data, colWidths=[120, 192, 192])
     mt.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#0284c7")),
+        ('BACKGROUND', (0,0), (-1,0), c_table_hdr_bg),
         ('ALIGN', (0,0), (-1,-1), 'LEFT'),
         ('VALIGN', (0,0), (-1,-1), 'TOP'),
         ('BOTTOMPADDING', (0,0), (-1,-1), 4),
         ('TOPPADDING', (0,0), (-1,-1), 4),
         ('LEFTPADDING', (0,0), (-1,-1), 5),
         ('RIGHTPADDING', (0,0), (-1,-1), 5),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#cbd5e1")),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor("#f8fafc")])
+        ('GRID', (0,0), (-1,-1), 0.5, c_grid),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [c_table_row1, c_table_row2])
     ]))
     story.append(mt)
     story.append(Spacer(1, 10))
@@ -422,9 +463,17 @@ def build_pdf():
         "developer training, and application security research.", body_style
     ))
 
-    # Build the document using NumberedCanvas
-    doc.build(story, canvasmaker=NumberedCanvas)
-    print("SUCCESS: VulnLab_Project_Report.pdf generated successfully!")
+    # Custom canvas maker that tags theme
+    class ThemedCanvas(NumberedCanvas):
+        is_dark_theme = dark_mode
+
+    bg_callback = draw_dark_background if dark_mode else draw_light_background
+    doc.build(story, canvasmaker=ThemedCanvas, onFirstPage=bg_callback, onLaterPages=bg_callback)
+    print(f"SUCCESS: Generated {filename} (dark_mode={dark_mode})")
+
 
 if __name__ == '__main__':
-    build_pdf()
+    # 1. Standard Light Theme (with solid white opaque background for dark mode viewers)
+    build_pdf("VulnLab_Project_Report.pdf", dark_mode=False)
+    # 2. Native Dark Theme (Cyberpunk dark background with bright text and cyan titles)
+    build_pdf("VulnLab_Project_Report_Dark.pdf", dark_mode=True)

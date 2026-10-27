@@ -68,12 +68,12 @@ const INTEL_DATABASE = {
     'upload_module.upload': {
         concept: "Does the backend deeply analyze magic bytes / file signatures, or does it naively rely on client-supplied Content-Type headers and weak extension checks?",
         vector: "Insecure File Upload saving directly to publicly accessible static directories.",
-        payload: "Execute: python attacks/upload_attack.py"
+        payload: "python attacks/upload_attack.py"
     },
     'dashboard': {
         concept: "Session IDs that are adopted before authentication and not cleared/regenerated allow attackers to pre-set user sessions.",
         vector: "Session Fixation and cookie hijacking due to missing HttpOnly flags.",
-        payload: "Execute: python attacks/session_fixation.py"
+        payload: "python attacks/session_fixation.py"
     },
     'file_inclusion.view_doc': {
         concept: "Direct concatenation of user-supplied filenames to directory paths allows relative path dot traversal outside the document root.",
@@ -88,7 +88,7 @@ const INTEL_DATABASE = {
     'bruteforce.login_bruteforce': {
         concept: "Authentication endpoints without throttling or lockout thresholds can be systematically attacked using wordlists.",
         vector: "Credential guessing / dictionary brute-force.",
-        payload: "Execute: python attacks/bruteforce_attack.py"
+        payload: "python attacks/bruteforce_attack.py"
     },
     'recon.recon_workbench': {
         concept: "Overly descriptive crawler control files and exposed backup copies reveal sensitive endpoints to attackers.",

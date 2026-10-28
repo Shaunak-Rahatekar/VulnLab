@@ -7,34 +7,17 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 
-class VITNumberedCanvas(canvas.Canvas):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._saved_page_states = []
-
-    def showPage(self):
-        self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
-
-    def save(self):
-        num_pages = len(self._saved_page_states)
-        for state in self._saved_page_states:
-            self.__dict__.update(state)
-            self.draw_page_decorations()
-            canvas.Canvas.showPage(self)
-        canvas.Canvas.save(self)
-
-    def draw_page_decorations(self):
-        self.saveState()
-        # Draw solid opaque white background on every page
-        self.setFillColor(colors.white)
-        self.rect(0, 0, letter[0], letter[1], fill=1, stroke=0)
-        
-        # Draw top-right page number exactly as in the reference format
-        self.setFont("Times-Roman", 11)
-        self.setFillColor(colors.black)
-        self.drawRightString(letter[0] - 54, letter[1] - 40, str(self._pageNumber))
-        self.restoreState()
+def draw_page_decorations(canvas_obj, doc):
+    canvas_obj.saveState()
+    # Draw solid opaque white background on every page BEFORE content
+    canvas_obj.setFillColor(colors.white)
+    canvas_obj.rect(0, 0, letter[0], letter[1], fill=1, stroke=0)
+    
+    # Draw top-right page number exactly as in the reference format
+    canvas_obj.setFont("Times-Roman", 11)
+    canvas_obj.setFillColor(colors.black)
+    canvas_obj.drawRightString(letter[0] - 54, letter[1] - 40, str(canvas_obj._pageNumber))
+    canvas_obj.restoreState()
 
 
 def build_vit_report_pdf():
@@ -604,7 +587,7 @@ def build_vit_report_pdf():
         story.append(Paragraph(r, body_justify))
         story.append(Spacer(1, 4))
 
-    doc.build(story, canvasmaker=VITNumberedCanvas)
+    doc.build(story, onFirstPage=draw_page_decorations, onLaterPages=draw_page_decorations)
     print("SUCCESS: VulnLab_VIT_Project_Report.pdf generated successfully!")
 
 if __name__ == '__main__':

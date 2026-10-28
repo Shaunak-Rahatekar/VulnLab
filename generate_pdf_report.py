@@ -8,59 +8,34 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 
-class NumberedCanvas(canvas.Canvas):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._saved_page_states = []
-
-    def showPage(self):
-        self._saved_page_states.append(dict(self.__dict__))
-        self._startPage()
-
-    def save(self):
-        num_pages = len(self._saved_page_states)
-        for state in self._saved_page_states:
-            self.__dict__.update(state)
-            self.draw_page_decorations(num_pages)
-            canvas.Canvas.showPage(self)
-        canvas.Canvas.save(self)
-
-    def draw_page_decorations(self, page_count):
-        # Determine theme from canvas attribute if set, default to light
-        is_dark = getattr(self, 'is_dark_theme', False)
-
-        if self._pageNumber > 1:
-            self.saveState()
-            self.setFont("Helvetica", 9)
-            if is_dark:
-                self.setFillColor(colors.HexColor("#94a3b8"))
-                self.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
-                self.drawRightString(letter[0] - 54, 36, f"Page {self._pageNumber} of {page_count}")
-                self.setStrokeColor(colors.HexColor("#334155"))
-            else:
-                self.setFillColor(colors.HexColor("#64748b"))
-                self.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
-                self.drawRightString(letter[0] - 54, 36, f"Page {self._pageNumber} of {page_count}")
-                self.setStrokeColor(colors.HexColor("#cbd5e1"))
-            self.setLineWidth(0.5)
-            self.line(54, 48, letter[0] - 54, 48)
-            self.restoreState()
-
-
-def draw_light_background(canv, doc):
-    canv.saveState()
-    # Explicit solid white background rectangle covering the entire page
-    canv.setFillColor(colors.white)
-    canv.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
-    canv.restoreState()
-
-
-def draw_dark_background(canv, doc):
-    canv.saveState()
-    # Dark cyberpunk navy background covering the entire page
-    canv.setFillColor(colors.HexColor("#0b0f19"))
-    canv.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
-    canv.restoreState()
+def make_page_callback(dark_mode=False):
+    def page_callback(canv, doc):
+        canv.saveState()
+        # 1. Background
+        if dark_mode:
+            canv.setFillColor(colors.HexColor("#0b0f19"))
+            canv.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
+            if canv._pageNumber > 1:
+                canv.setFont("Helvetica", 9)
+                canv.setFillColor(colors.HexColor("#94a3b8"))
+                canv.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
+                canv.drawRightString(doc.pagesize[0] - 54, 36, f"Page {canv._pageNumber}")
+                canv.setStrokeColor(colors.HexColor("#334155"))
+                canv.setLineWidth(0.5)
+                canv.line(54, 48, doc.pagesize[0] - 54, 48)
+        else:
+            canv.setFillColor(colors.white)
+            canv.rect(0, 0, doc.pagesize[0], doc.pagesize[1], fill=1, stroke=0)
+            if canv._pageNumber > 1:
+                canv.setFont("Helvetica", 9)
+                canv.setFillColor(colors.HexColor("#64748b"))
+                canv.drawString(54, 36, "VulnLab: Project Report — VIT Pune")
+                canv.drawRightString(doc.pagesize[0] - 54, 36, f"Page {canv._pageNumber}")
+                canv.setStrokeColor(colors.HexColor("#cbd5e1"))
+                canv.setLineWidth(0.5)
+                canv.line(54, 48, doc.pagesize[0] - 54, 48)
+        canv.restoreState()
+    return page_callback
 
 
 def build_pdf(filename="VulnLab_Project_Report.pdf", dark_mode=False):
@@ -463,12 +438,8 @@ def build_pdf(filename="VulnLab_Project_Report.pdf", dark_mode=False):
         "developer training, and application security research.", body_style
     ))
 
-    # Custom canvas maker that tags theme
-    class ThemedCanvas(NumberedCanvas):
-        is_dark_theme = dark_mode
-
-    bg_callback = draw_dark_background if dark_mode else draw_light_background
-    doc.build(story, canvasmaker=ThemedCanvas, onFirstPage=bg_callback, onLaterPages=bg_callback)
+    cb = make_page_callback(dark_mode=dark_mode)
+    doc.build(story, onFirstPage=cb, onLaterPages=cb)
     print(f"SUCCESS: Generated {filename} (dark_mode={dark_mode})")
 
 
